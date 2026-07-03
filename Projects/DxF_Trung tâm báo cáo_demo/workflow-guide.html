@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Workflow · Video Demo bằng Playwright × HyperFrames</title>
+<style>
+  :root{
+    --bg:#05070d; --bg2:#080d18; --panel:#0c1424; --panel2:#0f1a30;
+    --ink:#eaf2ff; --muted:#9fb6df; --dim:#6d7f9e;
+    --cyan:#22d3ee; --cyan-deep:#06b6d4; --violet:#a78bfa; --violet-deep:#7c3aed;
+    --line:rgba(34,211,238,0.16); --line2:rgba(148,163,184,0.14);
+    --warn:#fbbf24; --red:#fb7185; --green:#34d399;
+    --code:#0a1020; --grad:linear-gradient(100deg,var(--cyan),var(--violet));
+    --mono:ui-monospace,"Cascadia Code","JetBrains Mono",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Inter",-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    line-height:1.65;font-size:17px;
+    background-image:
+      radial-gradient(90% 60% at 20% -5%,rgba(34,211,238,0.10),transparent 60%),
+      radial-gradient(80% 60% at 95% 5%,rgba(124,58,237,0.12),transparent 55%);
+    background-attachment:fixed;}
+  a{color:var(--cyan);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  .accent{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* top nav */
+  nav.top{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);
+    background:rgba(5,7,13,0.72);border-bottom:1px solid var(--line);}
+  nav.top .wrap{display:flex;align-items:center;gap:20px;height:60px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px}
+  .logo .m{width:30px;height:30px;border-radius:8px;background:var(--grad);
+    display:flex;align-items:center;justify-content:center;color:#04121a;font-weight:900;font-size:15px}
+  nav.top .links{margin-left:auto;display:flex;gap:22px;font-size:15px;font-weight:600}
+  nav.top .links a{color:var(--muted)} nav.top .links a:hover{color:var(--cyan);text-decoration:none}
+  @media(max-width:720px){nav.top .links{display:none}}
+
+  /* hero */
+  header.hero{padding:70px 0 30px;text-align:center}
+  .eyebrow{font-size:15px;font-weight:700;letter-spacing:0.34em;color:var(--cyan);text-transform:uppercase}
+  h1{font-size:clamp(34px,5.4vw,60px);line-height:1.08;margin:20px 0 14px;font-weight:800;letter-spacing:-0.02em}
+  .sub{font-size:clamp(17px,2.2vw,21px);color:var(--muted);max-width:760px;margin:0 auto}
+  .toolrow{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:28px}
+  .tool{font-size:14px;font-weight:600;padding:8px 16px;border-radius:999px;
+    background:var(--panel);border:1px solid var(--line);color:var(--ink)}
+  .tool b{color:var(--cyan)}
+
+  /* showcase */
+  .showcase{margin:44px 0 10px}
+  .frame{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);
+    box-shadow:0 30px 90px rgba(0,0,0,0.55);background:#000}
+  .frame video{display:block;width:100%;height:auto}
+  .cap-under{margin-top:14px;text-align:center;color:var(--dim);font-size:14.5px}
+  .cap-under b{color:var(--muted)}
+
+  section{padding:44px 0;border-top:1px solid var(--line2)}
+  h2{font-size:clamp(24px,3.4vw,34px);font-weight:800;letter-spacing:-0.01em;margin:0 0 6px;
+    display:flex;align-items:center;gap:14px}
+  h2 .n{width:38px;height:38px;flex:none;border-radius:10px;background:var(--grad);color:#04121a;
+    font-weight:900;font-size:19px;display:flex;align-items:center;justify-content:center}
+  h2.plain .n{background:rgba(34,211,238,0.14);color:var(--cyan);border:1px solid var(--line)}
+  .lead{color:var(--muted);margin:0 0 22px;font-size:18px}
+
+  /* pipeline flow */
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin-top:8px}
+  .flow .step{flex:1 1 150px;min-width:150px;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:16px 16px;position:relative}
+  .flow .step .k{font-size:12px;font-weight:800;letter-spacing:0.12em;color:var(--cyan);text-transform:uppercase}
+  .flow .step .t{font-weight:700;margin-top:6px;font-size:15.5px}
+  .flow .step .d{color:var(--dim);font-size:13px;margin-top:4px}
+
+  /* step cards */
+  .card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+    border-radius:18px;padding:26px 28px;margin:18px 0}
+  .card h3{margin:0 0 4px;font-size:21px;font-weight:800}
+  .card .goal{color:var(--muted);margin:0 0 16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+  .thumb{border-radius:12px;border:1px solid var(--line2);width:100%;display:block}
+  ul.tick{list-style:none;padding:0;margin:10px 0 0}
+  ul.tick li{position:relative;padding-left:26px;margin:8px 0;color:var(--muted)}
+  ul.tick li::before{content:"";position:absolute;left:2px;top:9px;width:9px;height:9px;border-radius:2px;background:var(--grad)}
+  ul.tick li b{color:var(--ink)}
+
+  /* code */
+  pre{background:var(--code);border:1px solid var(--line2);border-radius:12px;padding:16px 18px;
+    overflow-x:auto;margin:14px 0 0;font-family:var(--mono);font-size:13.5px;line-height:1.6;color:#cfe0f8}
+  pre .c{color:#5d7290}       /* comment */
+  pre .g{color:var(--green)}  /* command/keyword */
+  pre .y{color:var(--warn)}   /* flag/value */
+  pre .v{color:var(--violet)} /* var */
+  code.inl{font-family:var(--mono);font-size:0.9em;background:rgba(148,163,184,0.14);
+    padding:2px 7px;border-radius:6px;color:#dbe7ff}
+
+  /* callout */
+  .note{border-radius:14px;padding:16px 20px;margin:14px 0;border:1px solid;font-size:15.5px}
+  .note .h{font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .note.warn{background:rgba(251,191,36,0.07);border-color:rgba(251,191,36,0.32)}
+  .note.warn .h{color:var(--warn)}
+  .note.tip{background:rgba(52,211,153,0.06);border-color:rgba(52,211,153,0.28)}
+  .note.tip .h{color:var(--green)}
+
+  /* gotchas grid */
+  .gg{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.gg{grid-template-columns:1fr}}
+  .gc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  .gc .t{font-weight:800;font-size:16px;margin-bottom:6px;color:var(--ink)}
+  .gc .t .em{color:var(--red)}
+  .gc p{margin:0;color:var(--muted);font-size:14.5px}
+
+  /* tree */
+  .tree{background:var(--code);border:1px solid var(--line2);border-radius:12px;padding:18px 20px;
+    font-family:var(--mono);font-size:13.5px;line-height:1.7;color:#bcd0ee;overflow-x:auto}
+  .tree .f{color:var(--cyan)} .tree .cm{color:#5d7290}
+
+  footer{padding:40px 0 60px;border-top:1px solid var(--line2);color:var(--dim);font-size:14px;text-align:center}
+  .pill-note{display:inline-block;background:var(--panel);border:1px solid var(--line);border-radius:999px;
+    padding:6px 16px;font-size:13px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+
+<nav class="top"><div class="wrap">
+  <div class="logo"><span class="m">Dx</span><span>Playwright × <span class="accent">HyperFrames</span></span></div>
+  <div class="links">
+    <a href="#video">Video</a><a href="#flow">Pipeline</a><a href="#steps">Các bước</a><a href="#gotchas">Bí kíp</a>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Workflow dựng video demo sản phẩm</div>
+  <h1>Quay app thật bằng <span class="accent">Playwright</span>,<br/>dựng video bằng <span class="accent">HyperFrames</span></h1>
+  <p class="sub">Biến một luồng thao tác thật trên phần mềm thành một video demo bóng bẩy: footage thật + camera nhấn nhá + overlay số liệu sắc nét + giọng đọc tiếng Việt + nhạc nền — tất cả tái tạo được bằng code.</p>
+  <div class="toolrow">
+    <span class="tool"><b>Playwright</b> · quay footage</span>
+    <span class="tool"><b>ffmpeg</b> · cắt / tua / mix</span>
+    <span class="tool"><b>HyperFrames</b> · dựng &amp; render</span>
+    <span class="tool"><b>edge-tts</b> · giọng đọc VN</span>
+  </div>
+</div></header>
+
+<div class="wrap">
+  <div class="showcase" id="video">
+    <div class="frame">
+      <video controls preload="metadata" poster="assets/guide/poster.jpg">
+        <source src="assets/guide/showcase_720.mp4" type="video/mp4" />
+        Trình duyệt không hỗ trợ video.
+      </video>
+    </div>
+    <div class="cap-under">▶ <b>Video demo 60 giây</b> — được tạo 100% bằng chính workflow trong trang này (DxFactory · Trung tâm Báo cáo · Trợ lý AI).</div>
+  </div>
+</div>
+
+<!-- ===== WHY ===== -->
+<section id="why"><div class="wrap">
+  <h2 class="plain"><span class="n">?</span>Ý tưởng cốt lõi</h2>
+  <p class="lead">HyperFrames <b>không</b> sinh video từ ảnh bằng AI. Nó là bộ dựng <b>HTML → MP4</b>: điều khiển camera ảo, overlay đồ hoạ, caption, âm thanh trên một lớp nền. Vậy phần "nền" — chuyển động thật của phần mềm — ta lấy từ đâu? <span class="accent">Playwright quay lại chính app thật.</span></p>
+  <div class="grid2">
+    <div>
+      <ul class="tick">
+        <li><b>Footage thật, chuyển động thật</b> — bảng số chạy, panel AI stream, hiệu ứng của chính app. Thuyết phục hơn ảnh tĩnh.</li>
+        <li><b>Tái lập được</b> — app đổi UI thì chạy lại script, ra footage mới. Demo không lỗi thời.</li>
+        <li><b>Nét khi zoom</b> — quay ở độ phân giải cao (hoặc rebuild vùng zoom bằng HTML) để camera cận cảnh vẫn sắc.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="note tip"><div class="h">◆ Công thức "hybrid"</div>
+        Footage app làm <b>lớp nền không khí</b> (chứng minh "thật"), còn các con số quan trọng thì vẽ lại bằng <b>overlay HTML sắc nét</b> — vì chữ trong app quá nhỏ khi chiếu TV. Đây là chìa khoá cho phần "kết quả AI" trong video mẫu.</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ===== FLOW ===== -->
+<section id="flow"><div class="wrap">
+  <h2 class="plain"><span class="n">↦</span>Toàn cảnh pipeline</h2>
+  <p class="lead">Bảy chặng, mỗi chặng tạo ra một artifact đưa vào chặng sau. Narration là "xương sống" — thời lượng giọng đọc quyết định nhịp cắt footage.</p>
+  <div class="flow">
+    <div class="step"><div class="k">01 · Explore</div><div class="t">Khám phá app</div><div class="d">Playwright login, lưu session, dò selector</div></div>
+    <div class="step"><div class="k">02 · Capture</div><div class="t">Bắt dữ liệu thật</div><div class="d">Hỏi AI agent, lấy response thật</div></div>
+    <div class="step"><div class="k">03 · Record</div><div class="t">Quay footage</div><div class="d">recordVideo 1080p + con trỏ giả</div></div>
+    <div class="step"><div class="k">04 · Edit</div><div class="t">Cắt / tua</div><div class="d">ffmpeg setpts, ghép footage.mp4</div></div>
+    <div class="step"><div class="k">05 · Voice</div><div class="t">Giọng đọc</div><div class="d">edge-tts vi-VN, phiên âm keyword</div></div>
+    <div class="step"><div class="k">06 · Audio</div><div class="t">Master audio</div><div class="d">narration + nhạc nền, limiter</div></div>
+    <div class="step"><div class="k">07 · Compose</div><div class="t">Dựng &amp; render</div><div class="d">HyperFrames: camera + overlay + caption</div></div>
+  </div>
+</div></section>
+
+<!-- ===== STEPS ===== -->
+<section id="steps"><div class="wrap">
+  <h2><span class="n">0</span>Chuẩn bị công cụ</h2>
+  <p class="lead">Không cần API key trả phí. Giọng đọc dùng edge-tts miễn phí; transcription/render đều chạy local.</p>
+  <div class="card">
+    <ul class="tick">
+      <li><b>Node</b> + <b>ffmpeg/ffprobe</b> có trong PATH</li>
+      <li><b>Playwright</b>: <code class="inl">npm i playwright &amp;&amp; npx playwright install chromium</code></li>
+      <li><b>edge-tts</b> (Python): <code class="inl">pip install edge-tts</code> — giọng <code class="inl">vi-VN-HoaiMyNeural</code> (nữ, vui tươi)</li>
+      <li><b>HyperFrames CLI</b>: gọi qua <code class="inl">npx hyperframes@0.7.10</code> khi cần</li>
+    </ul>
+  </div>
+
+  <h2><span class="n">1</span>Khám phá app &amp; đăng nhập</h2>
+  <p class="lead">Đăng nhập một lần, lưu <code class="inl">storageState</code> ra <code class="inl">auth.json</code> để các lần sau bỏ qua login. Dò đúng selector cho từng thao tác.</p>
+  <div class="card">
+<pre><span class="c">// login-explore.mjs — đăng nhập, lưu session, dump selector</span>
+<span class="v">const</span> ctx = <span class="g">await</span> browser.newContext({ viewport:{width:1600,height:900} });
+<span class="g">await</span> page.goto(BASE + <span class="y">'/sign-in'</span>);
+<span class="g">await</span> page.locator(<span class="y">'mat-select'</span>).click();              <span class="c">// chọn tổ chức</span>
+<span class="g">await</span> page.locator(<span class="y">'mat-option'</span>, {hasText:/nois/i}).click();
+<span class="g">await</span> page.locator(<span class="y">'#email'</span>).fill(EMAIL);
+<span class="g">await</span> page.locator(<span class="y">'#password'</span>).fill(PASS);
+<span class="g">await</span> page.locator(<span class="y">'button'</span>, {hasText:/ĐĂNG NHẬP/}).click();
+<span class="g">await</span> ctx.storageState({ path: <span class="y">'auth.json'</span> });         <span class="c">// ← tái dùng session</span></pre>
+    <div class="note tip"><div class="h">◆ Mẹo</div>Dump các phần tử tương tác (id / placeholder / text / toạ độ) ra JSON rồi chụp màn hình từng bước — đọc để viết selector chính xác thay vì đoán mò.</div>
+  </div>
+
+  <h2><span class="n">2</span>Bắt dữ liệu thật từ AI agent</h2>
+  <p class="lead">Hỏi agent đúng câu trong kịch bản, chờ tới khi trả lời <b>ổn định</b> rồi lấy nguyên văn. Chính con số thật này sẽ dẫn dắt narration &amp; overlay.</p>
+  <div class="card">
+    <div class="grid2">
+      <div>
+        <ul class="tick">
+          <li>Gõ câu hỏi vào ô chat, nhấn Enter</li>
+          <li><b>Poll</b> nội dung panel tới khi văn bản dài ra &amp; ổn định ~25s (agent chạy chậm, có giai đoạn "reasoning")</li>
+          <li>Lưu <code class="inl">answer.txt</code> — trích số liệu: <i>83 sự cố, K12 743h, NISHI1 MTTR 25.8h…</i></li>
+        </ul>
+      </div>
+      <div><img class="thumb" src="assets/guide/thumb_47.jpg" alt="AI insight overlay"/></div>
+    </div>
+  </div>
+
+  <h2><span class="n">3</span>Quay footage bằng Playwright</h2>
+  <p class="lead">Quay ở <b>1920×1080 full-bleed</b> (không viền browser — hợp TV), chèn <b>con trỏ chuột giả</b>, và ghi lại mốc thời gian từng phase để lát cắt.</p>
+  <div class="card">
+    <div class="grid2">
+      <div>
+<pre><span class="c">// context có recordVideo + init-script con trỏ giả</span>
+ctx = <span class="g">await</span> browser.newContext({
+  viewport:{width:<span class="y">1920</span>,height:<span class="y">1080</span>},
+  recordVideo:{ dir:<span class="y">'video'</span>, size:{width:1920,height:1080} }
+});
+<span class="c">// con trỏ giả bám theo mouse event của Playwright</span>
+<span class="g">await</span> ctx.addInitScript(() =&gt; {
+  <span class="v">const</span> c = document.createElement(<span class="y">'div'</span>); c.id=<span class="y">'__cur'</span>;
+  <span class="c">/* svg mũi tên, position:fixed, z-index max */</span>
+  document.addEventListener(<span class="y">'mousemove'</span>, e =&gt;
+    c.style.transform=<span class="y">`translate(${e.clientX}px,${e.clientY}px)`</span>, <span class="v">true</span>);
+});
+<span class="g">await</span> page.mouse.move(x,y,{steps:30}); <span class="c">// con trỏ lướt mượt tới đích</span></pre>
+      </div>
+      <div>
+        <img class="thumb" src="assets/guide/thumb_22.jpg" alt="footage dashboard"/>
+        <div class="note warn" style="margin-top:14px"><div class="h">▲ Agent chậm?</div>Response mất ~2–3 phút. Vẫn quay bình thường, rồi <b>tua nhanh ~40×</b> đoạn xử lý ở bước cắt.</div>
+      </div>
+    </div>
+  </div>
+
+  <h2><span class="n">4</span>Cắt &amp; tua footage (ffmpeg)</h2>
+  <p class="lead">Chuyển WebM → MP4 seekable, cắt từng beat và chỉnh tốc độ khớp với thời lượng narration, rồi ghép thành một <code class="inl">footage.mp4</code>.</p>
+  <div class="card">
+<pre><span class="c"># WebM → MP4 30fps, keyframe dày (seek mượt trong HyperFrames)</span>
+ffmpeg <span class="y">-i</span> page.webm <span class="y">-vf</span> <span class="y">"fps=30,scale=1920:1080"</span> \
+  <span class="y">-c:v</span> libx264 <span class="y">-g</span> 30 <span class="y">-pix_fmt</span> yuv420p full.mp4
+
+<span class="c"># Cắt 1 beat + chỉnh tốc độ — LƯU Ý: -ss/-t đặt TRƯỚC -i thì setpts mới ăn</span>
+ffmpeg <span class="y">-ss</span> 31 <span class="y">-t</span> 200.8 <span class="y">-i</span> full.mp4 \
+  <span class="y">-vf</span> <span class="y">"setpts=(PTS-STARTPTS)/44.62,fps=30"</span> <span class="g">-an</span> proc.mp4   <span class="c"># ~40× nhanh</span>
+
+<span class="c"># Ghép các beat lại</span>
+ffmpeg <span class="y">-f</span> concat <span class="y">-i</span> list.txt <span class="y">-movflags</span> +faststart footage.mp4</pre>
+  </div>
+
+  <h2><span class="n">5</span>Viết narration &amp; tạo giọng đọc</h2>
+  <p class="lead">Kịch bản tiếng Việt, giọng nữ vui tươi. Keyword tiếng Anh <b>phiên âm</b> cho thuận tai người Việt.</p>
+  <div class="card">
+    <div class="grid2">
+      <div>
+        <ul class="tick">
+          <li>AI → <b>"ây ai"</b>, DxFactory → <b>"đi-ếch phách-to-ri"</b></li>
+          <li>Đo thời lượng từng câu (<code class="inl">ffprobe</code>) để dựng timeline</li>
+          <li>Gọi qua <b>CLI</b> (API hay lỗi <i>NoAudioReceived</i>) + retry/backoff</li>
+        </ul>
+      </div>
+      <div>
+<pre><span class="c"># giọng nữ VN, vui tươi, hơi nhanh</span>
+python <span class="y">-m</span> edge_tts <span class="y">--voice</span> vi-VN-HoaiMyNeural \
+  <span class="y">--rate</span>=+6% <span class="y">--text</span> <span class="y">"..."</span> <span class="y">--write-media</span> vo.mp3</pre>
+      </div>
+    </div>
+  </div>
+
+  <h2><span class="n">6</span>Trộn master audio</h2>
+  <p class="lead">Đặt từng câu đúng mốc bằng <code class="inl">adelay</code>, thêm nhạc nền âm lượng thấp, chống clip bằng <code class="inl">alimiter</code>.</p>
+  <div class="card">
+<pre>ffmpeg <span class="y">-i</span> vo01.mp3 … <span class="y">-i</span> vo10.mp3 <span class="y">-stream_loop</span> -1 <span class="y">-i</span> bgm.wav \
+ <span class="y">-filter_complex</span> <span class="y">"</span>
+   [0]adelay=400|400[a0]; … [9]adelay=55000|55000[a9];
+   [10]volume=0.11,afade=out:st=59.5:d=2.5[bg];
+   [a0]…[a9][bg]amix=inputs=11:normalize=0[mx];
+   [mx]alimiter=limit=0.95[out]<span class="y">"</span> <span class="y">-map</span> <span class="y">"[out]"</span> master.m4a</pre>
+  </div>
+
+  <h2><span class="n">7</span>Dựng composition &amp; render</h2>
+  <p class="lead">HyperFrames: footage là <code class="inl">&lt;video&gt;</code> nền, camera ảo zoom bằng cách tween <code class="inl">#video-wrap</code>, overlay card sắc nét + caption, và một <code class="inl">&lt;audio&gt;</code> master.</p>
+  <div class="card">
+<pre><span class="c">&lt;!-- footage nền + audio master --&gt;</span>
+&lt;<span class="g">div</span> <span class="v">id</span>=<span class="y">"video-wrap"</span>&gt;
+  &lt;<span class="g">video</span> <span class="v">src</span>=<span class="y">"assets/footage.mp4"</span> muted playsinline
+         <span class="v">data-start</span>=<span class="y">"12.5"</span> <span class="v">data-duration</span>=<span class="y">"39.5"</span> <span class="v">data-track-index</span>=<span class="y">"1"</span>&gt;&lt;/<span class="g">video</span>&gt;
+&lt;/<span class="g">div</span>&gt;
+&lt;<span class="g">audio</span> <span class="v">src</span>=<span class="y">"assets/master.m4a"</span> <span class="v">data-start</span>=<span class="y">"0"</span> <span class="v">data-duration</span>=<span class="y">"62"</span>&gt;&lt;/<span class="g">audio</span>&gt;
+
+<span class="c">// camera ảo: chỉ tween WRAPPER, không tween video</span>
+<span class="v">const</span> cam={s:1,x:0,y:0};
+tl.to(cam,{ s:1.2, x:-170, <span class="v">onUpdate</span>:() =&gt;
+  vw.style.transform=<span class="y">`translate(${cam.x}px,${cam.y}px) scale(${cam.s})`</span> }, 27);</pre>
+<pre><span class="c"># render ra MP4</span>
+npx hyperframes@0.7.10 render . <span class="y">-o</span> renders/demo.mp4 <span class="y">--fps</span> 30</pre>
+    <div class="note tip"><div class="h">◆ QA</div>Chụp <code class="inl">snapshot --at 4,22,42,56</code> soi bố cục trước; <code class="inl">lint</code> phải sạch; kiểm tra audio (<code class="inl">volumedetect</code>) không clip.</div>
+  </div>
+</div></section>
+
+<!-- ===== GOTCHAS ===== -->
+<section id="gotchas"><div class="wrap">
+  <h2 class="plain"><span class="n">!</span>Bí kíp &amp; cạm bẫy</h2>
+  <p class="lead">Những chỗ tốn thời gian nhất — biết trước để khỏi vấp.</p>
+  <div class="gg">
+    <div class="gc"><div class="t">Con trỏ chuột <span class="em">vô hình</span></div><p>Playwright điều khiển mouse ảo, recordVideo <b>không hiện con trỏ</b>. Phải tự chèn 1 div con trỏ bám theo <code class="inl">mousemove</code>.</p></div>
+    <div class="gc"><div class="t">Zoom vào bitmap → <span class="em">vỡ nét</span></div><p>Cần <code class="inl">sourceRes ≥ renderRes × zoom</code>. Quay ở 2× viewport, hoặc rebuild vùng zoom bằng HTML (chữ vector zoom bao nhiêu cũng nét).</p></div>
+    <div class="gc"><div class="t">ffmpeg: <span class="em">setpts không ăn</span></div><p>Đặt <code class="inl">-ss/-t</code> <b>trước</b> <code class="inl">-i</code> (input-seek) thì <code class="inl">setpts</code> mới đổi tốc độ đúng. Đặt sau <code class="inl">-i</code> sẽ hỏng.</p></div>
+    <div class="gc"><div class="t">edge-tts <span class="em">NoAudioReceived</span></div><p>API hay lỗi chập chờn (rate-limit). Gọi qua <b>CLI</b>, xoá file rỗng &amp; retry với backoff, giãn cách giữa các câu.</p></div>
+    <div class="gc"><div class="t">HyperFrames: đừng <span class="em">tl.call()</span></div><p>Renderer seek từng frame → callback đổi nội dung có thể không chạy. Chỉ dùng <b>tween opacity</b> để bật/tắt phần tử.</p></div>
+    <div class="gc"><div class="t">Video: <span class="em">tween wrapper</span></div><p>Video phải <code class="inl">muted playsinline</code>, audio để riêng. Animate <code class="inl">#video-wrap</code> chứ không animate kích thước thẻ video.</p></div>
+    <div class="gc"><div class="t">Agent chậm → <span class="em">tua nhanh</span></div><p>Đoạn AI reasoning ~200s nén còn ~4–5s (setpts ~40×). Giữ nhịp cho phần "hỏi" &amp; "kết quả".</p></div>
+    <div class="gc"><div class="t">Chữ Việt <span class="em">rớt dòng</span></div><p>Tiêu đề lớn dễ wrap xấu. Nới <code class="inl">max-width</code>/bớt padding + <code class="inl">white-space:nowrap</code> cho cụm cần đi liền.</p></div>
+  </div>
+</div></section>
+
+<!-- ===== TREE ===== -->
+<section id="tree"><div class="wrap">
+  <h2 class="plain"><span class="n">▸</span>Cấu trúc dự án</h2>
+  <div class="tree">
+DxF_Trung tâm báo cáo_demo/
+├── <span class="f">recorder/</span>              <span class="cm"># Playwright: explore + record</span>
+│   ├── login-explore.mjs   <span class="cm"># đăng nhập, lưu auth.json</span>
+│   ├── capture-answer.mjs   <span class="cm"># hỏi agent, lấy response thật</span>
+│   ├── record-full.mjs      <span class="cm"># quay footage + con trỏ giả</span>
+│   ├── auth.json  full.mp4  <span class="cm"># session + footage gốc</span>
+│   └── seg/                 <span class="cm"># các beat đã cắt/tua</span>
+├── <span class="f">assets/</span>
+│   ├── footage.mp4          <span class="cm"># footage đã ghép</span>
+│   ├── voice/vo01…vo10.mp3  <span class="cm"># 10 câu narration (edge-tts)</span>
+│   ├── master.m4a           <span class="cm"># narration + nhạc nền đã mix</span>
+│   └── bgm/track.wav
+├── gen_vo.py               <span class="cm"># sinh giọng đọc VN</span>
+├── index.html              <span class="cm"># composition HyperFrames</span>
+└── renders/dxf_demo_60s.mp4 <span class="cm"># ← thành phẩm</span>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div>Workflow: <b style="color:var(--muted)">Playwright × HyperFrames × edge-tts</b> · dựng bởi Claude Code</div>
+  <div class="pill-note">Mọi bước đều tái tạo bằng code — sửa kịch bản/số liệu &amp; render lại trong vài phút.</div>
+</div></footer>
+
+</body>
+</html>

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HyperFrames · Hướng dẫn dựng video bằng AI Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg-deep: #05070d;
+    --bg-panel: #0c1426;
+    --bg-panel-2: #0a1120;
+    --ink: #eaf2ff;
+    --muted: #9fb6df;
+    --muted-dim: #6f86ad;
+    --cyan: #22d3ee;
+    --cyan-deep: #06b6d4;
+    --violet: #a78bfa;
+    --violet-deep: #7c3aed;
+    --line: rgba(34, 211, 238, 0.18);
+    --line-soft: rgba(159, 182, 223, 0.12);
+    --grad: linear-gradient(100deg, #22d3ee, #a78bfa);
+    --grad-hero: linear-gradient(100deg, #22d3ee 0%, #67e8f9 35%, #a78bfa 100%);
+    --green: #28c840;
+    --amber: #febc2e;
+    --radius: 16px;
+    --maxw: 1100px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--ink);
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ── living background ───────────────────────────────── */
+  #bg { position: fixed; inset: 0; z-index: -1; overflow: hidden;
+    background: radial-gradient(120% 120% at 50% 0%, #0b1226 0%, #06080f 55%, #03040a 100%); }
+  .glow { position: absolute; width: 1100px; height: 1100px; border-radius: 50%;
+    filter: blur(38px); mix-blend-mode: screen; opacity: 0.55; }
+  .glowA { left: -300px; top: -340px;
+    background: radial-gradient(circle, rgba(34,211,238,0.42) 0%, rgba(34,211,238,0) 64%);
+    animation: floatA 16s ease-in-out infinite; }
+  .glowB { right: -340px; top: 30%;
+    background: radial-gradient(circle, rgba(124,58,237,0.46) 0%, rgba(124,58,237,0) 64%);
+    animation: floatB 19s ease-in-out infinite; }
+  @keyframes floatA { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(280px,180px) scale(1.15); } }
+  @keyframes floatB { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-240px,-160px) scale(1.18); } }
+  #grid-floor { position: fixed; left: 50%; bottom: -16%; z-index: -1; width: 2800px; height: 1200px;
+    transform: translateX(-50%) perspective(680px) rotateX(72deg); transform-origin: center bottom; opacity: 0.16;
+    background-image: linear-gradient(rgba(34,211,238,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.32) 1px, transparent 1px);
+    background-size: 120px 120px;
+    -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0) 70%);
+    mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0) 70%); }
+
+  /* ── nav ─────────────────────────────────────────────── */
+  header.nav { position: sticky; top: 0; z-index: 50;
+    background: rgba(5,7,13,0.72); backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line); }
+  .nav-inner { max-width: var(--maxw); margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; gap: 18px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; letter-spacing: -0.3px; white-space: nowrap; }
+  .brand .logo { width: 30px; height: 30px; border-radius: 8px; background: var(--grad);
+    box-shadow: 0 0 18px rgba(34,211,238,0.45); display: grid; place-items: center;
+    font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 16px; color: #05070d; }
+  .brand b { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .nav-links { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 13.5px; font-weight: 500;
+    padding: 7px 12px; border-radius: 9px; transition: all 0.18s; white-space: nowrap; }
+  .nav-links a:hover { color: var(--ink); background: rgba(34,211,238,0.08); }
+  .nav-links a.active { color: var(--cyan); background: rgba(34,211,238,0.1); }
+  .nav-toggle { display: none; margin-left: auto; background: none; border: 1px solid var(--line);
+    color: var(--ink); border-radius: 9px; padding: 8px 12px; font-size: 18px; cursor: pointer; }
+
+  /* ── layout ──────────────────────────────────────────── */
+  main { max-width: var(--maxw); margin: 0 auto; padding: 0 24px 120px; }
+  section { padding: 72px 0 8px; scroll-margin-top: 88px; }
+  section > .eyebrow { font-family: "JetBrains Mono", monospace; font-size: 13px; font-weight: 700;
+    letter-spacing: 0.28em; text-transform: uppercase; color: var(--cyan); margin-bottom: 14px; }
+  h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.6px; line-height: 1.12; color: var(--ink); }
+  h2 { font-size: clamp(30px, 4.4vw, 46px); margin-bottom: 18px; }
+  h3 { font-size: clamp(21px, 2.6vw, 27px); margin: 30px 0 12px; font-weight: 600; }
+  h4 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  p { color: var(--muted); margin-bottom: 16px; }
+  p.lede { font-size: clamp(18px, 2.2vw, 22px); color: #cfe0f8; max-width: 760px; }
+  a { color: var(--cyan); }
+  strong, b { color: var(--ink); font-weight: 600; }
+  .accent { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  code:not(pre code) { font-family: "JetBrains Mono", monospace; font-size: 0.86em;
+    background: rgba(34,211,238,0.1); color: #9fe9f6; padding: 2px 7px; border-radius: 6px;
+    border: 1px solid rgba(34,211,238,0.16); }
+  ul, ol { margin: 0 0 18px 0; padding-left: 22px; }
+  li { color: var(--muted); margin-bottom: 9px; }
+  li::marker { color: var(--cyan); }
+  hr.div { border: none; height: 1px; background: var(--line); margin: 56px 0; }
+
+  /* ── hero ────────────────────────────────────────────── */
+  .hero { padding: 92px 0 36px; }
+  .hero .tag { display: inline-flex; align-items: center; gap: 9px; font-family: "JetBrains Mono", monospace;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.18em; color: var(--cyan);
+    border: 1px solid var(--line); background: rgba(34,211,238,0.06); border-radius: 999px; padding: 8px 16px; margin-bottom: 26px; }
+  .hero .tag .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+  .hero h1 { font-size: clamp(42px, 7vw, 84px); font-weight: 800; letter-spacing: -2.5px; margin-bottom: 22px; }
+  .hero h1 .grad { background: var(--grad-hero); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 40px rgba(34,211,238,0.25)); }
+  .hero p { max-width: 720px; }
+  .hero .cta { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 30px; }
+  .btn { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; font-weight: 600; font-size: 15px;
+    padding: 13px 22px; border-radius: 12px; transition: all 0.18s; cursor: pointer; border: 1px solid transparent; }
+  .btn-primary { background: var(--grad); color: #05070d; box-shadow: 0 0 30px rgba(34,211,238,0.3); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 36px rgba(34,211,238,0.42); }
+  .btn-ghost { background: rgba(12,20,38,0.6); color: var(--ink); border-color: var(--line); }
+  .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  /* hero stat strip */
+  .hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 48px; }
+  .hero-stats .s { background: rgba(12,20,38,0.5); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+  .hero-stats .s .n { font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero-stats .s .l { font-size: 13px; color: var(--muted); letter-spacing: 0.02em; margin-top: 4px; }
+
+  /* ── cards / panels ──────────────────────────────────── */
+  .panel { background: linear-gradient(180deg, rgba(12,20,38,0.62), rgba(8,16,30,0.5));
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 28px; margin: 18px 0; }
+  .panel.tip { border-left: 3px solid var(--cyan); }
+  .panel.warn { border-left: 3px solid var(--amber); }
+  .panel.violet { border-left: 3px solid var(--violet); }
+  .grid { display: grid; gap: 18px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .card { background: rgba(12,20,38,0.5); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 24px; transition: all 0.2s; }
+  .card:hover { border-color: rgba(34,211,238,0.4); transform: translateY(-3px); box-shadow: 0 14px 40px rgba(2,6,18,0.5); }
+  .card .ic { width: 44px; height: 44px; border-radius: 11px; display: grid; place-items: center; font-size: 22px;
+    background: rgba(34,211,238,0.1); border: 1px solid var(--line); margin-bottom: 14px; }
+  .card.role-sales .ic { background: rgba(34,211,238,0.12); }
+  .card.role-ba .ic { background: rgba(167,139,250,0.14); }
+  .card.role-pm .ic { background: rgba(40,200,64,0.12); }
+  .card h4 { font-size: 19px; }
+  .card p { font-size: 14.5px; margin-bottom: 0; }
+  .card ul { margin-top: 12px; margin-bottom: 0; }
+  .card li { font-size: 14px; }
+
+  /* numbered steps */
+  .steps { counter-reset: step; margin: 22px 0; }
+  .step { position: relative; padding: 0 0 4px 62px; margin-bottom: 26px; }
+  .step::before { counter-increment: step; content: counter(step); position: absolute; left: 0; top: 0;
+    width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center;
+    font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 19px; color: #05070d; background: var(--grad);
+    box-shadow: 0 0 22px rgba(34,211,238,0.3); }
+  .step h4 { font-size: 19px; margin-bottom: 6px; }
+  .step p { margin-bottom: 10px; }
+
+  /* ── code blocks ─────────────────────────────────────── */
+  .code { position: relative; margin: 16px 0; border-radius: 13px; overflow: hidden;
+    border: 1px solid var(--line); background: #060a14; }
+  .code .bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+    background: rgba(8,14,28,0.95); border-bottom: 1px solid var(--line-soft); }
+  .code .bar .d { width: 11px; height: 11px; border-radius: 50%; }
+  .code .bar .r { background: #ff5f57; } .code .bar .y { background: var(--amber); } .code .bar .g { background: var(--green); }
+  .code .bar .label { margin-left: 8px; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--muted-dim); }
+  .code .copy { margin-left: auto; background: rgba(34,211,238,0.08); border: 1px solid var(--line); color: var(--cyan);
+    font-family: "JetBrains Mono", monospace; font-size: 11.5px; font-weight: 600; padding: 5px 11px; border-radius: 7px;
+    cursor: pointer; transition: all 0.16s; }
+  .code .copy:hover { background: rgba(34,211,238,0.18); }
+  .code pre { margin: 0; padding: 18px 18px; overflow-x: auto; }
+  .code code { font-family: "JetBrains Mono", monospace; font-size: 13.5px; line-height: 1.7; color: #cfe0f8; white-space: pre; }
+  .code .cm { color: var(--muted-dim); }  /* comment */
+  .code .kw { color: var(--cyan); }        /* command/keyword */
+  .code .st { color: #b9f5a0; }            /* string */
+  .code .fl { color: var(--violet); }      /* flag */
+
+  /* prompt block */
+  .prompt { background: linear-gradient(120deg, rgba(34,211,238,0.07), rgba(167,139,250,0.07));
+    border: 1px solid rgba(34,211,238,0.3); border-left: 3px solid var(--cyan); border-radius: 14px;
+    padding: 20px 22px; margin: 16px 0; position: relative; }
+  .prompt .who { font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+    color: var(--cyan); text-transform: uppercase; margin-bottom: 10px; display: block; }
+  .prompt p { color: #dce8ff; font-size: 15px; margin-bottom: 0; }
+  .prompt .copy { position: absolute; top: 16px; right: 16px; background: rgba(34,211,238,0.1);
+    border: 1px solid var(--line); color: var(--cyan); font-family: "JetBrains Mono", monospace; font-size: 11px;
+    padding: 4px 10px; border-radius: 7px; cursor: pointer; }
+  .prompt .copy:hover { background: rgba(34,211,238,0.2); }
+
+  /* ── example video ───────────────────────────────────── */
+  .video-frame { border-radius: 18px; overflow: hidden; background: #0c1426;
+    border: 1px solid rgba(34,211,238,0.3); box-shadow: 0 34px 90px rgba(2,6,18,0.65), 0 0 70px rgba(34,211,238,0.1);
+    margin: 22px 0; }
+  .video-frame .chrome { height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 16px;
+    background: rgba(8,14,28,0.96); border-bottom: 1px solid var(--line); }
+  .video-frame .chrome .d { width: 11px; height: 11px; border-radius: 50%; }
+  .video-frame .chrome .url { flex: 1; margin-left: 10px; height: 26px; display: flex; align-items: center; padding: 0 14px;
+    border-radius: 7px; background: rgba(34,211,238,0.06); border: 1px solid rgba(34,211,238,0.14);
+    font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--muted); }
+  .video-frame video { display: block; width: 100%; height: auto; background: #05070d; }
+
+  .shots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 22px 0; }
+  .shot { border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: #0c1426; }
+  .shot img { display: block; width: 100%; height: auto; }
+  .shot .cap { padding: 12px 16px; font-size: 13.5px; }
+  .shot .cap b { color: var(--cyan); font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 0.1em; }
+
+  /* timeline */
+  .timeline { margin: 24px 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .tl-row { display: grid; grid-template-columns: 96px 1fr; border-bottom: 1px solid var(--line-soft); }
+  .tl-row:last-child { border-bottom: none; }
+  .tl-row:nth-child(odd) { background: rgba(12,20,38,0.35); }
+  .tl-time { padding: 14px 16px; font-family: "JetBrains Mono", monospace; font-size: 13px; font-weight: 700;
+    color: var(--cyan); border-right: 1px solid var(--line-soft); display: flex; align-items: center; }
+  .tl-body { padding: 13px 18px; }
+  .tl-body h4 { font-size: 15.5px; margin-bottom: 3px; }
+  .tl-body p { font-size: 13.5px; margin-bottom: 0; color: var(--muted); }
+  .tl-body .scr { color: #cfe0f8; font-style: italic; }
+
+  /* table */
+  .tbl { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14.5px;
+    border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .tbl th, .tbl td { padding: 13px 16px; text-align: left; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  .tbl th { background: rgba(34,211,238,0.08); color: var(--cyan); font-weight: 600; font-size: 13px;
+    letter-spacing: 0.04em; text-transform: uppercase; }
+  .tbl td { color: var(--muted); }
+  .tbl tr:last-child td { border-bottom: none; }
+  .tbl td b, .tbl td code { white-space: nowrap; }
+
+  .pill { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; padding: 3px 10px; border-radius: 999px; margin-right: 6px;
+    background: rgba(34,211,238,0.1); color: var(--cyan); border: 1px solid var(--line); }
+  .pill.v { background: rgba(167,139,250,0.12); color: var(--violet); border-color: rgba(167,139,250,0.25); }
+  .pill.req { background: rgba(40,200,64,0.12); color: #6fe88a; border-color: rgba(40,200,64,0.25); }
+  .pill.opt { background: rgba(254,188,46,0.1); color: var(--amber); border-color: rgba(254,188,46,0.25); }
+
+  /* footer */
+  footer { border-top: 1px solid var(--line); margin-top: 60px; padding: 40px 24px 70px; }
+  .foot-inner { max-width: var(--maxw); margin: 0 auto; color: var(--muted-dim); font-size: 13.5px; }
+  .foot-inner b { color: var(--muted); }
+
+  .toc-mini { font-size: 13px; color: var(--muted); }
+
+  /* responsive */
+  @media (max-width: 860px) {
+    .nav-links { display: none; position: absolute; top: 60px; left: 0; right: 0;
+      flex-direction: column; background: rgba(5,7,13,0.97); border-bottom: 1px solid var(--line); padding: 12px; }
+    .nav-links.open { display: flex; }
+    .nav-toggle { display: block; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .shots { grid-template-columns: 1fr; }
+    .hero-stats { grid-template-columns: 1fr 1fr; }
+    .step { padding-left: 54px; }
+    .tl-row { grid-template-columns: 78px 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="bg"><div class="glow glowA"></div><div class="glow glowB"></div></div>
+<div id="grid-floor"></div>
+
+<!-- ══════════ NAV ══════════ -->
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand"><span class="logo">HF</span> Hyper<b>Frames</b></div>
+    <button class="nav-toggle" aria-label="menu">☰</button>
+    <nav class="nav-links">
+      <a href="#gioi-thieu">Giới thiệu</a>
+      <a href="#cai-dat">Cài đặt</a>
+      <a href="#input">File đầu vào</a>
+      <a href="#prompt">Cách prompt</a>
+      <a href="#vidu">Ví dụ DxFactory</a>
+      <a href="#quytrinh">Quy trình</a>
+      <a href="#usecase">Use case</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ══════════ HERO ══════════ -->
+  <section class="hero" id="top">
+    <span class="tag"><span class="dot"></span> NEW OCEAN GROUP · CÔNG NGHỆ 4.0 · AI VIDEO</span>
+    <h1>Dựng video chuyên nghiệp<br />bằng <span class="grad">HTML &amp; AI Agent</span></h1>
+    <p class="lede">HyperFrames biến một thư mục screenshot, slide hoặc một đoạn brief thành video 60&nbsp;giây có voiceover, nhạc nền và chuyển cảnh điện ảnh — toàn bộ do AI agent dựng từ HTML, render thành MP4. Hướng dẫn này đi từ cài đặt → chuẩn bị đầu vào → cách prompt, lấy chính video <b>DxFactory × AI Agent</b> làm ví dụ.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#vidu">▶ Xem video ví dụ</a>
+      <a class="btn btn-ghost" href="#cai-dat">Bắt đầu cài đặt</a>
+    </div>
+    <div class="hero-stats">
+      <div class="s"><div class="n">60s</div><div class="l">Video, 1920×1080 · 30fps</div></div>
+      <div class="s"><div class="n">10</div><div class="l">Cảnh + voiceover tiếng Việt</div></div>
+      <div class="s"><div class="n">1</div><div class="l">File HTML là source-of-truth</div></div>
+      <div class="s"><div class="n">0</div><div class="l">Phần mềm dựng phim truyền thống</div></div>
+    </div>
+  </section>
+
+  <hr class="div" />
+
+  <!-- ══════════ GIỚI THIỆU ══════════ -->
+  <section id="gioi-thieu">
+    <div class="eyebrow">01 · HyperFrames là gì</div>
+    <h2>Một video = một file HTML + một timeline</h2>
+    <p class="lede">Thay vì kéo-thả trong phần mềm dựng phim, bạn (hoặc AI agent) viết một file <code>index.html</code>: bố cục bằng CSS, hoạt hình bằng GSAP timeline, timing bằng các thuộc tính <code>data-*</code>. Framework lo phần hiện/ẩn cảnh, phát media và đồng bộ timeline, rồi render ra MP4 chuẩn.</p>
+
+    <div class="grid grid-3" style="margin-top:26px">
+      <div class="card">
+        <div class="ic">🧱</div>
+        <h4>HTML/CSS/GSAP</h4>
+        <p>Mỗi cảnh là một khối HTML. Chuyển động dùng GSAP, kiểu dáng dùng CSS — không cần học công cụ mới nếu bạn biết web.</p>
+      </div>
+      <div class="card">
+        <div class="ic">🤖</div>
+        <h4>AI Agent dựng hộ</h4>
+        <p>Bạn ra brief bằng ngôn ngữ tự nhiên trong Claude Code. Bộ <b>skills</b> của HyperFrames hướng dẫn agent dựng đúng chuẩn framework.</p>
+      </div>
+      <div class="card">
+        <div class="ic">🎬</div>
+        <h4>Render = MP4</h4>
+        <p>Một lệnh <code>render</code> chạy headless Chrome, chụp từng frame và đóng gói thành MP4/WebM — có cả voiceover, nhạc nền, phụ đề.</p>
+      </div>
+    </div>
+
+    <h3>Repo này có gì</h3>
+    <table class="tbl">
+      <tr><th>Thư mục</th><th>Vai trò</th></tr>
+      <tr><td><code>.agents/skills/</code> &amp; <code>agent/skills/</code></td><td>Bộ <b>skills</b> hướng dẫn AI agent: <code>hyperframes</code> (điều phối), <code>product-launch-video</code>, <code>faceless-explainer</code>, <code>website-to-video</code>, <code>hyperframes-media</code> (TTS/nhạc/phụ đề)…</td></tr>
+      <tr><td><code>Projects/</code></td><td>Các project video. Mỗi project là một thư mục độc lập có <code>index.html</code>, <code>assets/</code>, <code>renders/</code>.</td></tr>
+      <tr><td><code>Projects/DxFac_AI_Agent_Video/</code></td><td>Video ví dụ trong tài liệu này — đã dựng hoàn chỉnh và render ra MP4.</td></tr>
+      <tr><td><code>Projects/DxFac_with_AI_Agent/</code></td><td><b>File đầu vào thô</b> của ví dụ: 2 file PowerPoint use-case + các ảnh chụp màn hình <code>UC1.*</code>, <code>UC2.*</code>.</td></tr>
+      <tr><td><code>skills-lock.json</code></td><td>Khóa phiên bản các skill đã cài (giống lockfile của npm).</td></tr>
+    </table>
+
+    <div class="panel tip">
+      <h4 style="color:var(--cyan)">💡 Ý tưởng cốt lõi</h4>
+      <p style="margin-bottom:0">Bạn <b>không</b> phải tự viết HTML. Bạn chuẩn bị nguyên liệu (ảnh, slide, đường link thương hiệu), rồi <b>mô tả video mong muốn</b> cho AI agent. Agent đọc skills, dựng HTML, kiểm tra (lint) và render. Tài liệu này dạy bạn cách chuẩn bị nguyên liệu và cách ra brief sao cho ra video đẹp ngay từ lần đầu.</p>
+    </div>
+  </section>
+
+  <hr class="div" />
+
+  <!-- ══════════ CÀI ĐẶT ══════════ -->
+  <section id="cai-dat">
+    <div class="eyebrow">02 · Tải về &amp; chuẩn bị môi trường</div>
+    <h2>Yêu cầu &amp; cài đặt</h2>
+    <p class="lede">HyperFrames chạy qua CLI <code>npx hyperframes</code>. Dưới đây là tất cả những thứ cần có.</p>
+
+    <table class="tbl">
+      <tr><th>Thành phần</th><th>Bắt buộc?</th><th>Ghi chú</th></tr>
+      <tr><td><b>Node.js ≥ 22</b></td><td><span class="pill req">Bắt buộc</span></td><td>Khuyến nghị bản LTS mới nhất (ví dụ đã test trên v24). Cài tại <a href="https://nodejs.org">nodejs.org</a>.</td></tr>
+      <tr><td><b>FFmpeg</b></td><td><span class="pill req">Bắt buộc</span></td><td>Dùng để đóng gói video/âm thanh. Windows: <code>winget install Gyan.FFmpeg</code> hoặc tải tại ffmpeg.org.</td></tr>
+      <tr><td><b>Chrome (headless)</b></td><td><span class="pill req">Bắt buộc</span></td><td>HyperFrames tải kèm Chrome riêng. Quản lý bằng <code>npx hyperframes browser</code>.</td></tr>
+      <tr><td><b>Claude Code</b> (AI agent)</td><td><span class="pill req">Bắt buộc</span></td><td>Nơi bạn ra brief. Skills của HyperFrames được agent đọc để dựng đúng chuẩn.</td></tr>
+      <tr><td><b>HeyGen API key</b></td><td><span class="pill opt">Tùy chọn</span></td><td>Bật giọng đọc (TTS) &amp; nhạc nền chất lượng cao từ thư viện HeyGen. Không có key vẫn chạy được: TTS dùng <b>Kokoro</b> local, nhạc nền tự sinh local.</td></tr>
+    </table>
+
+    <h3>Bước cài đặt</h3>
+    <div class="steps">
+      <div class="step">
+        <h4>Kiểm tra môi trường</h4>
+        <p>Mở terminal trong thư mục repo và xác nhận Node ≥ 22:</p>
+        <div class="code"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="label">terminal</span><button class="copy">Copy</button></div><pre><code><span class="kw">node</span> --version   <span class="cm"># cần &gt;= v22</span>
+<span class="kw">npx</span> hyperframes doctor   <span class="cm"># kiểm tra Chrome, FFmpeg, Node, RAM</span></code></pre></div>
+      </div>
+      <div class="step">
+        <h4>Cài bộ skills của HyperFrames</h4>
+        <p>Repo này đã có sẵn skills trong <code>.agents/skills/</code>. Nếu cần cài mới hoặc cập nhật, chạy lệnh dưới rồi khởi động lại phiên agent để skill được nạp:</p>
+        <div class="code"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="label">terminal</span><button class="copy">Copy</button></div><pre><code><span class="kw">npx</span> skills add heygen-com/hyperframes</code></pre></div>
+      </div>
+      <div class="step">
+        <h4>(Tùy chọn) Khai báo HeyGen API key cho giọng đọc &amp; nhạc</h4>
+        <p>Đặt biến môi trường <code>HEYGEN_API_KEY</code>. Không có key thì bỏ qua bước này — hệ thống tự fallback sang giọng/nhạc chạy local.</p>
+        <div class="code"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="label">PowerShell</span><button class="copy">Copy</button></div><pre><code><span class="cm"># PowerShell — phiên hiện tại</span>
+<span class="fl">$env:</span>HEYGEN_API_KEY = <span class="st">"hg_xxx..."</span>
+<span class="cm"># hoặc lưu vĩnh viễn:</span>
+<span class="kw">setx</span> HEYGEN_API_KEY <span class="st">"hg_xxx..."</span></code></pre></div>
+      </div>
+      <div class="step">
+        <h4>Tạo project mới (khi bắt đầu video mới)</h4>
+        <p>Mỗi video sống trong một thư mục riêng. Lệnh <code>init</code> tạo đúng cấu trúc, copy media và cài skills:</p>
+        <div class="code"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="label">terminal</span><button class="copy">Copy</button></div><pre><code><span class="kw">npx</span> hyperframes init Projects/Ten-Video-Cua-Ban
+<span class="cm"># hoặc chọn template có sẵn:</span>
+<span class="kw">npx</span> hyperframes init Projects/Promo --example product-promo</code></pre></div>
+        <p class="toc-mini">Template có sẵn: <code>blank</code>, <code>warm-grain</code>, <code>swiss-grid</code>, <code>kinetic-type</code>, <code>product-promo</code>, <code>nyt-graph</code>…</p>
+      </div>
+    </div>
+
+    <div class="panel warn">
+      <h4 style="color:var(--amber)">⚠ Lưu ý quan trọng</h4>
+      <p style="margin-bottom:0"><code>npm run dev</code> (preview server) là tiến trình <b>chạy nền lâu dài</b> — đừng chạy ở foreground sẽ bị timeout. Trong Claude Code agent luôn chạy nó ở chế độ background. Sau mỗi lần sửa HTML phải chạy <code>npm run check</code> để lint trước khi render.</p>
+    </div>
+  </section>
+
+  <hr class="div" />
+
+  <!-- ══════════ FILE ĐẦU VÀO ══════════ -->
+  <section id="input">
+    <div class="eyebrow">03 · Chuẩn bị nguyên liệu</div>
+    <h2>Cách chuẩn bị file đầu vào</h2>
+    <p class="lede">Video đẹp bắt đầu từ nguyên liệu tốt. Bạn không cần nhiều — nhưng càng rõ ràng, agent càng dựng đúng. Đây là chính xác những gì đã dùng cho ví dụ DxFactory.</p>
+
+    <div class="grid grid-2" style="margin-top:24px">
+      <div class="card">
+        <div class="ic">🖼️</div>
+        <h4>Ảnh chụp màn hình sản phẩm</h4>
+        <p>Là "ngôi sao" của mỗi cảnh. Chụp gọn, độ phân giải cao (ưu tiên ≥ 1600px ngang). Đặt tên có ý nghĩa.</p>
+        <ul>
+          <li>Ví dụ: <code>UC1.1.png</code> … <code>UC2.4.png</code></li>
+          <li>Mỗi use case nên có 2–4 ảnh: "hỏi AI", "báo cáo", "drill-down", "kết quả".</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="ic">📊</div>
+        <h4>Slide / tài liệu nguồn</h4>
+        <p>Cung cấp nội dung &amp; số liệu để agent viết kịch bản chính xác.</p>
+        <ul>
+          <li>Ví dụ: 2 file <code>.pptx</code> mô tả từng use case.</li>
+          <li>Trích các con số quan trọng: tiết kiệm 60–70h/tháng, OEE +1–3%, MTTR −50%.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="ic">🎨</div>
+        <h4>Thương hiệu (brand)</h4>
+        <p>Một đường link website hoặc file <code>DESIGN.md</code> mô tả màu sắc, font, tông giọng.</p>
+        <ul>
+          <li>Ví dụ: <code>https://dxfac.com</code> + <code>DESIGN.md</code> "Data Drift".</li>
+          <li>Agent dùng để chọn đúng palette: cyan #22d3ee, violet #a78bfa, nền space-black #05070d.</li>
+        </ul>
+      </div>
+      <div class="card violet">
+        <div class="ic">📝</div>
+        <h4>Brief / nội dung</h4>
+        <p>Một đoạn mô tả: ai xem, dài bao lâu, ngôn ngữ, tông cảm xúc, thông điệp chính.</p>
+        <ul>
+          <li>Ví dụ: "60 giây, tiếng Việt, futuristic, 2 use case AI Agent cho sản xuất."</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>DESIGN.md — bản "cheat sheet" thương hiệu</h3>
+    <p>Nếu project có file <code>DESIGN.md</code> (hoặc <code>design.md</code>), agent đọc nó <b>trước tiên</b> và coi đó là chân lý về màu/font/quy tắc. Đây là một phần file thật của ví dụ DxFactory:</p>
+    <div class="code"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="label">DESIGN.md</span><button class="copy">Copy</button></div><pre><code><span class="cm">---
+name: DxFactory × AI Agent — Use Cases (Futuristic)
+source: https://dxfac.com/
+mood: futuristic, immersive, high-energy tech
+format: 1920x1080 landscape, 60s
+language: Vietnamese (with EN terms: AI Agent, OEE, MTTR, RCA)
+---</span>
+
+<span class="kw">## Colors</span>
+bg-deep   #05070d   <span class="cm"># nền space-black</span>
+ink       #eaf2ff   <span class="cm"># chữ chính</span>
+cyan      #22d3ee   <span class="cm"># accent chính (glow)</span>
+violet    #a78bfa   <span class="cm"># accent phụ</span>
+<span class="cm"># Gradient: linear-gradient(100deg, #22d3ee, #a78bfa)</span>
+
+<span class="kw">## Typography</span>
+Headline: Inter 200–700 · Codes/metrics: JetBrains Mono 700</code></pre></div>
+
+    <div class="panel tip">
+      <h4 style="color:var(--cyan)">📁 Sắp xếp thư mục đầu vào</h4>
+      <p style="margin-bottom:0">Cách đơn giản nhất: tạo một thư mục, bỏ tất cả nguyên liệu thô vào (giống <code>Projects/DxFac_with_AI_Agent/</code> chứa PPTX + ảnh <code>UC1.*</code>, <code>UC2.*</code>). Sau đó chỉ cho agent đường dẫn thư mục đó trong prompt. Agent sẽ tự crop/đổi tên ảnh và đưa vào <code>assets/shots/</code> của project video.</p>
+    </div>
+  </section>
+
+  <hr class="div" />
+
+  <!-- ══════════ CÁCH PROMPT ══════════ -->
+  <section id="prompt">
+    <div class="eyebrow">04 · Ra brief cho AI Agent</div>
+    <h2>Cách prompt để build ra video</h2>
+    <p class="lede">Bạn gõ yêu cầu trong Claude Code. Skill <code>/hyperframes</code> đóng vai "tổng đài" — đọc ý định của bạn rồi định tuyến tới đúng workflow. Bí quyết: nêu rõ <b>nguồn</b>, <b>độ dài</b>, <b>ngôn ngữ</b>, <b>tông</b>, và <b>nguyên liệu</b>.</p>
+
+    <h3>Định tuyến workflow — gõ gì để ra cái gì</h3>
+    <table class="tbl">
+      <tr><th>Bạn có</th><th>Skill / lệnh</th><th>Ra</th></tr>
+      <tr><td>URL/brief sản phẩm</td><td><code>/product-launch-video</code></td><td>Video ra mắt / quảng bá 60–90s</td></tr>
+      <tr><td>Một website bất kỳ</td><td><code>/website-to-video</code></td><td>Video tour/showcase của site</td></tr>
+      <tr><td>Một chủ đề/bài viết (không URL)</td><td><code>/faceless-explainer</code></td><td>Video giải thích 60–90s</td></tr>
+      <tr><td>Video người nói có sẵn (MP4)</td><td><code>/embedded-captions</code></td><td>Cùng video + phụ đề</td></tr>
+      <tr><td>Một Pull Request GitHub</td><td><code>/pr-to-video</code></td><td>Video giải thích thay đổi code</td></tr>
+      <tr><td>Motion graphic ngắn (&lt;10s)</td><td><code>/motion-graphics</code></td><td>Title/animation/đồ họa số liệu</td></tr>
+      <tr><td>Trường hợp khác</td><td><code>/general-video</code></td><td>Video tùy biến bất kỳ độ dài</td></tr>
+    </table>
+    <p class="toc-mini">Không chắc chọn cái nào? Cứ gõ <code>/hyperframes</code> hoặc mô tả tự nhiên — agent sẽ tự định tuyến.</p>
+
+    <h3>Prompt mẫu — đúng cái đã dựng ra video DxFactory</h3>
+    <div class="prompt">
+      <span class="who">▸ Bạn gõ trong Claude Code</span>
+      <button class="copy">Copy</button>
+      <p>Dùng <b>/product-launch-video</b>. Làm video <b>60 giây</b> phong cách <b>futuristic, immersive, high-energy</b> giới thiệu <b>2 use case AI Agent</b> của nền tảng <b>DxFactory (New Ocean Group)</b>, định dạng <b>1920×1080</b>, <b>tiếng Việt</b> (giữ thuật ngữ EN: AI Agent, OEE, MTTR, RCA, drill-down).<br /><br />
+      Brand lấy từ <b>https://dxfac.com</b>, theo phong cách "Data Drift": nền space-black, chữ mảnh, hạt particle, glow cyan/violet.<br /><br />
+      Nguyên liệu trong <b>Projects/DxFac_with_AI_Agent/</b>: ảnh <b>UC1.*</b> cho <i>Operations Intelligence</i> (hỏi dữ liệu nhà máy bằng ngôn ngữ tự nhiên, báo cáo tự động &amp; drill-down); ảnh <b>UC2.*</b> cho <i>AI Maintenance Assistant — CMMS RCA</i> (phân tích nguyên nhân gốc, học liên tục).<br /><br />
+      Cần <b>voiceover tiếng Việt</b> + <b>nhạc nền điện tử driving</b>. Nhấn các số liệu: tiết kiệm 60–70h/tháng, ra quyết định &lt;15 phút, giảm 20% dừng máy, OEE +1–3%, MTTR −50%, tri thức 25 năm số hóa. Kết bằng CTA: dxfac.com.</p>
+    </div>
+
+    <h3>Một prompt tốt nên trả lời 6 câu hỏi</h3>
+    <div class="grid grid-3">
+      <div class="card"><h4>🎯 Ai xem &amp; ở đâu</h4><p>Khách hàng doanh nghiệp? Nội bộ? Mạng xã hội? → quyết định độ dài &amp; tông.</p></div>
+      <div class="card"><h4>⏱️ Độ dài &amp; tỉ lệ</h4><p>60s ngang 1920×1080, hay 1080×1920 dọc cho social.</p></div>
+      <div class="card"><h4>🗣️ Ngôn ngữ &amp; giọng</h4><p>Tiếng Việt? Có voiceover không? Giọng nam/nữ?</p></div>
+      <div class="card"><h4>🎨 Tông &amp; thương hiệu</h4><p>Futuristic, tối giản, ấm áp…? Link brand hoặc DESIGN.md.</p></div>
+      <div class="card"><h4>📦 Nguyên liệu</h4><p>Đường dẫn thư mục ảnh/slide, ảnh nào cho cảnh nào.</p></div>
+      <div class="card"><h4>📊 Thông điệp &amp; số liệu</h4><p>3–5 con số/ý chính cần nhấn. CTA cuối video.</p></div>
+    </div>
+
+    <h3>Prompt chỉnh sửa nhanh (sau khi đã có bản nháp)</h3>
+    <div class="prompt"><span class="who">▸ Sửa nhỏ</span><button class="copy">Copy</button><p>Cảnh 5 đổi số "60–70h" thành "70–80h" và làm chữ số to hơn. Cảnh title kéo dài thêm 0.5s. Render lại bản <b>high quality</b> ra <code>renders/final.mp4</code>.</p></div>
+    <div class="prompt violet"><span class="who">▸ Không có nguyên liệu sẵn</span><button class="copy">Copy</button><p>Dùng <b>/faceless-explainer</b>. Làm video 75s tiếng Việt giải thích "AI Agent giúp gì cho bảo trì nhà máy", tông chuyên nghiệp - dễ hiểu, có voiceover nữ + phụ đề, đồ họa số liệu minh họa. Không cần screenshot.</p></div>
+  </section>
+
+  <hr class="div" />
+
+  <!-- ══════════ VÍ DỤ CHI TIẾT ══════════ -->
+  <section id="vidu">
+    <div class="eyebrow">05 · Mổ xẻ chi tiết</div>
+    <h2>Ví dụ: <span class="accent">DxFactory × AI Agent</span> — 60 giây</h2>
+    <p class="lede">Đây là kết quả render thật từ project <code>Projects/DxFac_AI_Agent_Video/</code>. Bấm play để xem, rồi cuộn xuống để thấy từng cảnh được dựng ra sao.</p>
+
+    <div class="video-frame">
+      <div class="chrome">
+        <span class="d r" style="background:#ff5f57"></span><span class="d y" style="background:#febc2e"></span><span class="d g" style="background:#28c840"></span>
+        <span class="url">renders / DxFac_AI_Agent_60s_VO.mp4 · 1920×1080 · 30fps · có voiceover</span>
+      </div>
+      <video controls preload="metadata" playsinline>
+        <source src="Projects/DxFac_AI_Agent_Video/renders/DxFac_AI_Agent_60s_VO.mp4" type="video/mp4" />
+        Trình duyệt của bạn không phát được video. Mở trực tiếp file:
+        <a href="Projects/DxFac_AI_Agent_Video/renders/DxFac_AI_Agent_60s_VO.mp4">DxFac_AI_Agent_60s_VO.mp4</a>
+      </video>
+    </div>
+    <p class="toc-mini">Nếu video không hiện, hãy mở file HTML này bằng trình duyệt <b>ngay trong thư mục repo</b> (đường dẫn tương đối tới <code>Projects/DxFac_AI_Agent_Video/renders/</code>). Bản không voiceover: <code>DxFac_AI_Agent_60s.mp4</code>.</p>
+
+    <h3>Cấu trúc project tạo ra video này</h3>
+    <table class="tbl">
+      <tr><th>File / thư mục</th><th>Nội dung</th></tr>
+      <tr><td><code>DESIGN.md</code></td><td>Cheat sheet thương hiệu — màu, font, motion, do's &amp; don'ts.</td></tr>
+      <tr><td><code>index.html</code></td><td>Toàn bộ video: 10 cảnh, GSAP timeline 60s, nền particle, 11 track âm thanh.</td></tr>
+      <tr><td><code>assets/shots/</code></td><td>7 ảnh screenshot sản phẩm (uc1-report, uc1-analysis, uc2-ask, uc2-rca…).</td></tr>
+      <tr><td><code>assets/voice/</code></td><td>10 file <code>s1.wav</code>…<code>s10.wav</code> — voiceover tiếng Việt (giọng vi-VN-HoaiMy), mỗi cảnh một câu.</td></tr>
+      <tr><td><code>assets/bgm/track.wav</code></td><td>Nhạc nền điện tử 124 BPM, tự sinh deterministic bằng <code>scripts/make-music.mjs</code>.</td></tr>
+      <tr><td><code>package.json</code></td><td>Các lệnh: <code>dev</code>, <code>check</code>, <code>render</code>, <code>publish</code>, <code>music</code>.</td></tr>
+    </table>
+
+    <h3>Các screenshot trở thành "ngôi sao" mỗi cảnh</h3>
+    <div class="shots">
+      <div class="shot">
+        <img src="Projects/DxFac_AI_Agent_Video/assets/shots/uc1-report.png" alt="UC1 — Trung tâm báo cáo &amp; trợ lý AI" loading="lazy" />
+        <div class="cap"><b>UC-01 · ASK YOUR DATA</b><br />Hỏi dữ liệu nhà máy bằng ngôn ngữ tự nhiên, trả lời tức thì.</div>
+      </div>
+      <div class="shot">
+        <img src="Projects/DxFac_AI_Agent_Video/assets/shots/uc1-analysis.png" alt="UC1 — Báo cáo tự động &amp; drill-down" loading="lazy" />
+        <div class="cap"><b>UC-01 · AUTO REPORT</b><br />Báo cáo giao ca tự động &amp; drill-down truy ngược nguyên nhân.</div>
+      </div>
+      <div class="shot">
+        <img src="Projects/DxFac_AI_Agent_Video/assets/shots/uc2-ask.png" alt="UC2 — Hỏi AI khi máy gặp sự cố" loading="lazy" />
+        <div class="cap"><b>UC-02 · ASK AI</b><br />Máy hỏng? Hỏi AI 24/7 — tra cứu lịch sử + SOP tức thì.</div>
+      </div>
+      <div class="shot">
+        <img src="Projects/DxFac_AI_Agent_Video/assets/shots/uc2-rca.png" alt="UC2 — Phân tích nguyên nhân gốc" loading="lazy" />
+        <div class="cap"><b>UC-02 · ROOT CAUSE</b><br />Từ triệu chứng đến nguyên nhân gốc, học liên tục mỗi phiếu sửa.</div>
+      </div>
+    </div>
+
+    <h3>Dòng thời gian 60 giây — từng cảnh một</h3>
+    <div class="timeline">
+      <div class="tl-row"><div class="tl-time">0:00–0:06</div><div class="tl-body"><h4>① Title</h4><p>DxFACTORY × AI AGENT hiện dần, badge "2 USE CASES". <span class="scr">VO: giới thiệu trợ lý AI cho vận hành sản xuất.</span></p></div></div>
+      <div class="tl-row"><div class="tl-time">0:06–0:09</div><div class="tl-body"><h4>② Divider UC-01</h4><p>"Operations Intelligence" — tự động hóa báo cáo &amp; drill-down.</p></div></div>
+      <div class="tl-row"><div class="tl-time">0:09–0:18</div><div class="tl-body"><h4>③ Hỏi dữ liệu</h4><p>Screenshot <code>uc1-report.png</code> trôi vào với glow viền, bubble ví dụ: <span class="scr">"Vì sao Line A chậm tiến độ hôm nay?"</span></p></div></div>
+      <div class="tl-row"><div class="tl-time">0:18–0:25</div><div class="tl-body"><h4>④ Báo cáo tự động</h4><p><code>uc1-analysis.png</code> + 3 highlight: báo cáo tự động, drill-down nguyên nhân, 3 góc nhìn vận hành.</p></div></div>
+      <div class="tl-row"><div class="tl-time">0:25–0:30</div><div class="tl-body"><h4>⑤ Số liệu UC-01</h4><p>4 thẻ đếm: 60–70h tiết kiệm/tháng · &lt;15′ ra quyết định · ↓20% dừng máy · +1–3% OEE.</p></div></div>
+      <div class="tl-row"><div class="tl-time">0:30–0:34</div><div class="tl-body"><h4>⑥ Divider UC-02</h4><p>"AI Maintenance Assistant" — phân tích nguyên nhân gốc (RCA), sẵn sàng 24/7.</p></div></div>
+      <div class="tl-row"><div class="tl-time">0:34–0:42</div><div class="tl-body"><h4>⑦ Hỏi AI 24/7</h4><p><code>uc2-ask.png</code> + bubble triệu chứng: <span class="scr">"Máy rung &amp; có tiếng ồn bất thường."</span></p></div></div>
+      <div class="tl-row"><div class="tl-time">0:42–0:50</div><div class="tl-body"><h4>⑧ Nguyên nhân gốc</h4><p><code>uc2-rca.png</code>: chẩn đoán trong vài giây ("Mòn vòng bi"), học liên tục, tri thức 25 năm số hóa.</p></div></div>
+      <div class="tl-row"><div class="tl-time">0:50–0:54</div><div class="tl-body"><h4>⑨ Số liệu UC-02</h4><p>3 thẻ: ↓50% MTTR · 24/7 luôn trực · 25 năm tri thức chuyên gia.</p></div></div>
+      <div class="tl-row"><div class="tl-time">0:54–1:00</div><div class="tl-body"><h4>⑩ Outro / CTA</h4><p>"Nhà máy thông minh — vận hành cùng AI Agent" + dxfac.com · fade to black.</p></div></div>
+    </div>
+
+    <h3>Bên trong <code>index.html</code> — timing &amp; chuyển động</h3>
+    <p>Mỗi track âm thanh và mỗi cảnh đều khai báo timing bằng <code>data-*</code>. Chuyển cảnh dùng "blur crossfade" — không bao giờ cắt cứng:</p>
+    <div class="code"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="label">index.html (trích)</span><button class="copy">Copy</button></div><pre><code><span class="cm">&lt;!-- voiceover: 1 clip / cảnh, track 1, lồng trên nhạc nền --&gt;</span>
+&lt;audio id=<span class="st">"vo1"</span> data-start=<span class="st">"0.5"</span> data-duration=<span class="st">"4.45"</span>
+       data-track-index=<span class="st">"1"</span> src=<span class="st">"assets/voice/s1.wav"</span>&gt;&lt;/audio&gt;
+
+<span class="cm">// chuyển cảnh: blur crossfade 0.4s (power2.inOut)</span>
+<span class="kw">function</span> blurCross(oldSel, newSel, T) {
+  tl.to(oldSel,  { opacity: 0, filter: <span class="st">"blur(6px)"</span>, scale: 1.03, duration: 0.4 }, T);
+  tl.fromTo(newSel, { opacity: 0, filter: <span class="st">"blur(6px)"</span>, scale: 0.97 },
+                    { opacity: 1, filter: <span class="st">"blur(0px)"</span>, scale: 1, duration: 0.46 }, T);
+}
+blurCross(<span class="st">"#s1"</span>, <span class="st">"#s2"</span>, 5.6);   <span class="cm">// title → divider UC-01</span></code></pre></div>
+
+    <h3>Nhạc nền được tạo thế nào</h3>
+    <p>Ví dụ này tự tổng hợp nhạc bằng <code>scripts/make-music.mjs</code> (Node thuần, deterministic) — 124 BPM, vòng hợp âm Am–F–C–G, có riser + impact rơi đúng 2 mốc reveal use-case (6s, 30s) và finale (58s). Bạn cũng có thể để agent lấy nhạc từ thư viện HeyGen nếu có API key.</p>
+    <div class="code"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="label">terminal</span><button class="copy">Copy</button></div><pre><code><span class="kw">npm</span> run music     <span class="cm"># node scripts/make-music.mjs → assets/bgm/track.wav</span></code></pre></div>
+  </section>
+
+  <hr class="div" />
+
+  <!-- ══════════ QUY TRÌNH ══════════ -->
+  <section id="quytrinh">
+    <div class="eyebrow">06 · Pipeline dựng video</div>
+    <h2>Quy trình từ brief → MP4</h2>
+    <p class="lede">Khi bạn ra brief, agent chạy theo các bước sau (workflow <code>/product-launch-video</code>). Bạn chỉ cần duyệt ở vài điểm gate.</p>
+
+    <div class="steps">
+      <div class="step"><h4>Setup &amp; brief</h4><p>Chốt góc nhìn, độ dài, tỉ lệ, ngôn ngữ. Tạo project với <code>hyperframes init</code>.</p></div>
+      <div class="step"><h4>Capture nguyên liệu</h4><p>Crawl website (<code>hyperframes capture</code>) để lấy màu/font/ảnh, hoặc nhận thư mục ảnh/slide bạn đưa.</p></div>
+      <div class="step"><h4>Design system</h4><p>Đọc <code>DESIGN.md</code> (hoặc chọn preset) → chốt palette &amp; font cho toàn video.</p></div>
+      <div class="step"><h4>Storyboard &amp; script <span class="pill">bạn duyệt</span></h4><p>Agent dựng kịch bản từng cảnh + lời thoại, trình bạn duyệt trước khi đi tiếp.</p></div>
+      <div class="step"><h4>Audio</h4><p>Sinh voiceover (TTS), lấy mốc thời gian từng từ, tạo/lấy nhạc nền + SFX.</p></div>
+      <div class="step"><h4>Dựng từng cảnh (frames)</h4><p>Mỗi cảnh thành một khối HTML, ghép vào <code>index.html</code>, thêm chuyển cảnh.</p></div>
+      <div class="step"><h4>Kiểm tra &amp; render <span class="pill">bạn duyệt</span></h4><p>Lint → validate → inspect → preview cho bạn xem → render MP4 chất lượng cao.</p></div>
+    </div>
+
+    <h3>Bảng lệnh thường dùng</h3>
+    <div class="code"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="label">terminal — trong thư mục project</span><button class="copy">Copy</button></div><pre><code><span class="kw">npm</span> run dev        <span class="cm"># preview server (chạy nền, hot-reload)</span>
+<span class="kw">npm</span> run check      <span class="cm"># lint + validate + inspect — LUÔN chạy sau khi sửa</span>
+<span class="kw">npm</span> run render     <span class="cm"># render ra MP4</span>
+<span class="kw">npm</span> run publish    <span class="cm"># publish &amp; lấy link chia sẻ</span>
+
+<span class="cm"># hoặc gọi trực tiếp CLI:</span>
+<span class="kw">npx</span> hyperframes render <span class="fl">--quality</span> high <span class="fl">--output</span> renders/final.mp4
+<span class="kw">npx</span> hyperframes render <span class="fl">--quality</span> draft   <span class="cm"># nhanh, để xem thử</span>
+<span class="kw">npx</span> hyperframes render <span class="fl">--fps</span> 60 <span class="fl">--quality</span> high  <span class="cm"># bản giao cuối</span>
+<span class="kw">npx</span> hyperframes inspect <span class="fl">--at</span> 1.5,4,7.25       <span class="cm"># soi layout ở các mốc</span></code></pre></div>
+
+    <div class="panel tip">
+      <h4 style="color:var(--cyan)">✅ Checklist trước khi render bản cuối</h4>
+      <ul style="margin-bottom:0">
+        <li><code>lint</code> &amp; <code>validate</code> sạch (không lỗi).</li>
+        <li><code>inspect</code> không báo chữ tràn khung / ra ngoài canvas.</li>
+        <li>Cảnh hợp <code>DESIGN.md</code>: chỉ dùng màu trong palette, đúng font.</li>
+        <li>Mọi cảnh có chuyển cảnh (không cắt cứng); chỉ cảnh cuối được fade out.</li>
+      </ul>
+    </div>
+  </section>
+
+  <hr class="div" />
+
+  <!-- ══════════ USE CASE ══════════ -->
+  <section id="usecase">
+    <div class="eyebrow">07 · Áp dụng vào công việc</div>
+    <h2>Ý tưởng dùng HyperFrames hằng ngày</h2>
+    <p class="lede">Sức mạnh thật sự: biến tài liệu/screenshot bạn <b>đã có</b> thành video chuyên nghiệp trong vài chục phút, không cần đội dựng phim. Dưới đây là gợi ý theo từng vai trò.</p>
+
+    <div class="grid grid-3" style="margin-top:26px">
+      <div class="card role-sales">
+        <div class="ic">💼</div>
+        <h4>Cho Sales</h4>
+        <p style="margin-bottom:6px">Chốt deal nhanh hơn bằng video thay vì PDF dài.</p>
+        <ul>
+          <li><b>Demo cá nhân hóa</b>: video 60s cho từng khách hàng, lồng đúng tên/ngành/số liệu của họ.</li>
+          <li><b>Theo dõi sau gặp</b>: gửi clip tóm tắt giải pháp ngay sau cuộc họp.</li>
+          <li><b>Pitch sản phẩm</b>: như chính ví dụ DxFactory — 2 use case + ROI.</li>
+          <li><b>So sánh gói/giá</b>: motion graphic số liệu, đếm tăng dần.</li>
+          <li><b>Social/LinkedIn</b>: bản dọc 1080×1920 cho mỗi tính năng mới.</li>
+        </ul>
+      </div>
+      <div class="card role-ba">
+        <div class="ic">📐</div>
+        <h4>Cho BA (Business Analyst)</h4>
+        <p style="margin-bottom:6px">Truyền đạt yêu cầu &amp; quy trình rõ ràng, ai cũng hiểu.</p>
+        <ul>
+          <li><b>Walkthrough use case</b>: biến tài liệu đặc tả + wireframe thành video luồng nghiệp vụ.</li>
+          <li><b>Before/After</b>: minh họa quy trình cũ vs mới, nhấn điểm cải tiến.</li>
+          <li><b>Giải thích số liệu/KPI</b>: dashboard tĩnh → đồ họa động dễ tiêu hóa.</li>
+          <li><b>Tài liệu nghiệm thu (UAT)</b>: clip hướng dẫn từng bước thao tác.</li>
+          <li><b>Trình stakeholder</b>: tóm tắt phân tích thành 90s thay vì slide 30 trang.</li>
+        </ul>
+      </div>
+      <div class="card role-pm">
+        <div class="ic">🗂️</div>
+        <h4>Cho PM dự án</h4>
+        <p style="margin-bottom:6px">Cập nhật &amp; báo cáo tiến độ một cách cuốn hút.</p>
+        <ul>
+          <li><b>Sprint/Release recap</b>: video 60s tổng kết tính năng mới mỗi đợt.</li>
+          <li><b>Demo nội bộ</b>: screenshot build mới → clip giới thiệu cho team/lãnh đạo.</li>
+          <li><b>Kickoff dự án</b>: tầm nhìn, mục tiêu, lộ trình thành video mở màn.</li>
+          <li><b>Onboarding</b>: hướng dẫn quy trình/công cụ cho thành viên mới.</li>
+          <li><b>Status report</b>: biến số liệu tiến độ thành đồ họa động hằng tuần.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Mẫu lặp lại được (template hóa)</h3>
+    <p>Vì video là HTML, bạn có thể khai báo <b>biến</b> (<code>data-composition-variables</code>) rồi render hàng loạt với nội dung khác nhau — không sửa source. Hoàn hảo cho Sales gửi mỗi khách một bản, hoặc PM ra recap mỗi sprint:</p>
+    <div class="code"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="label">render hàng loạt với biến</span><button class="copy">Copy</button></div><pre><code><span class="cm"># cùng 1 video, đổi tên khách &amp; số liệu cho mỗi bản</span>
+<span class="kw">npx</span> hyperframes render <span class="fl">--variables</span> <span class="st">'{"khachHang":"Công ty A","tietKiem":"80h"}'</span> <span class="fl">--output</span> renders/congtyA.mp4
+<span class="kw">npx</span> hyperframes render <span class="fl">--variables</span> <span class="st">'{"khachHang":"Công ty B","tietKiem":"65h"}'</span> <span class="fl">--output</span> renders/congtyB.mp4</code></pre></div>
+
+    <div class="panel violet">
+      <h4 style="color:var(--violet)">🚀 Bắt đầu nhanh nhất</h4>
+      <p style="margin-bottom:0">Gom screenshot + vài con số vào một thư mục, mở Claude Code trong repo này, rồi gõ: <i>"Dùng /product-launch-video, làm video 60s tiếng Việt giới thiệu [sản phẩm], dùng ảnh trong [thư mục], nhấn các số [...], có voiceover + nhạc nền."</i> Phần còn lại để agent lo.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <p style="color:var(--muted)"><b>HyperFrames</b> — HTML là source-of-truth cho video. Tài liệu hướng dẫn nội bộ · ví dụ <b>DxFactory × AI Agent (New Ocean Group)</b>.</p>
+    <p style="margin-bottom:0">Tài liệu tham khảo: <code>npx hyperframes docs &lt;topic&gt;</code> · skill <code>/hyperframes</code> · <a href="https://hyperframes.heygen.com/llms.txt">hyperframes.heygen.com/llms.txt</a></p>
+  </div>
+</footer>
+
+<script>
+  // copy-to-clipboard cho mọi nút .copy
+  document.querySelectorAll('.copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var container = btn.closest('.code, .prompt');
+      var src = container.querySelector('code, p');
+      var text = src ? src.innerText : '';
+      navigator.clipboard.writeText(text).then(function () {
+        var old = btn.textContent;
+        btn.textContent = '✓ Đã copy';
+        setTimeout(function () { btn.textContent = old; }, 1400);
+      }).catch(function () {
+        btn.textContent = '⚠ Lỗi';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1400);
+      });
+    });
+  });
+
+  // mobile nav toggle
+  var toggle = document.querySelector('.nav-toggle');
+  var links = document.querySelector('.nav-links');
+  if (toggle) {
+    toggle.addEventListener('click', function () { links.classList.toggle('open'); });
+    links.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () { links.classList.remove('open'); });
+    });
+  }
+
+  // scrollspy — highlight mục đang xem
+  var sections = Array.prototype.slice.call(document.querySelectorAll('section[id]'));
+  var navItems = Array.prototype.slice.call(document.querySelectorAll('.nav-links a'));
+  function spy() {
+    var pos = window.scrollY + 120;
+    var current = '';
+    sections.forEach(function (s) { if (s.offsetTop <= pos) current = s.id; });
+    navItems.forEach(function (a) {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', spy, { passive: true });
+  spy();
+</script>
+</body>
+</html>

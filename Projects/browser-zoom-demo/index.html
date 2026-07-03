@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --cyan: #06b6d4;
+        --cyan-lite: #22d3ee;
+        --violet: #a78bfa;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --chrome: #e9edf3;
+        --chrome-line: #d3dae4;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0; padding: 0; width: 100%; height: 100%;
+        overflow: hidden; background: #0b1220;
+        font-family: "Inter", Arial, sans-serif;
+      }
+      #root { position: relative; width: 100%; height: 100%; }
+
+      /* ----- scene / stage ----- */
+      .scene {
+        position: absolute; inset: 0; overflow: hidden;
+        background: radial-gradient(120% 120% at 50% 40%, #101a2e 0%, #070b16 70%);
+      }
+
+      /* browser window sits centered with a bit of padding so it reads as an app window */
+      .browser {
+        position: absolute; left: 40px; top: 34px;
+        width: 1840px; height: 1012px;
+        border-radius: 16px; overflow: hidden;
+        background: #fff;
+        box-shadow: 0 30px 90px rgba(0,0,0,0.55), 0 2px 0 rgba(255,255,255,0.05);
+      }
+
+      /* ----- chrome ----- */
+      .chrome {
+        position: absolute; left: 0; top: 0; width: 100%; height: 76px;
+        background: var(--chrome); border-bottom: 1px solid var(--chrome-line);
+        display: flex; align-items: center; gap: 18px; padding: 0 22px; z-index: 5;
+      }
+      .dots { display: flex; gap: 10px; }
+      .dot { width: 15px; height: 15px; border-radius: 50%; }
+      .dot.r { background: #ff5f57; } .dot.y { background: #febc2e; } .dot.g { background: #28c840; }
+      .navbtns { display: flex; gap: 14px; color: #9aa6b6; font-size: 26px; }
+      .addr {
+        flex: 1; height: 46px; background: #fff; border: 1px solid var(--chrome-line);
+        border-radius: 24px; display: flex; align-items: center; gap: 10px;
+        padding: 0 20px; color: var(--ink); font-size: 24px;
+      }
+      .lock { color: #57b06f; font-size: 20px; }
+      .url-text { white-space: pre; letter-spacing: 0.2px; }
+      #caret { display: inline-block; width: 2px; height: 26px; background: var(--ink); transform: translateY(4px); }
+      .reload { color: #9aa6b6; font-size: 26px; }
+      /* page-load progress bar riding the bottom of the chrome */
+      #loadbar {
+        position: absolute; left: 0; bottom: -2px; height: 3px; width: 100%;
+        background: linear-gradient(90deg, var(--cyan), var(--cyan-lite));
+        transform: scaleX(0); transform-origin: left center; z-index: 6;
+      }
+
+      /* ----- viewport (holds the zoomable world) ----- */
+      .viewport {
+        position: absolute; left: 0; top: 76px; width: 1840px; height: 936px;
+        overflow: hidden; background: #fff;
+      }
+      .world {
+        position: absolute; inset: 0; transform-origin: 50% 50%; will-change: transform;
+      }
+      .page { position: absolute; inset: 0; background: #f5f7fa; }
+      .shot {
+        position: absolute; left: 0; top: 0; width: 1840px; height: auto; display: block;
+      }
+      #shot-report, #shot-analysis { opacity: 0; }
+
+      /* ----- HUD (screen-space crisp overlays) ----- */
+      .hud { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
+
+      /* dim veil to focus attention on the right side during zoom */
+      #veil { position: absolute; inset: 0; opacity: 0;
+        background: linear-gradient(90deg, rgba(6,12,26,0.55) 0%, rgba(6,12,26,0.28) 45%, rgba(6,12,26,0) 72%); }
+
+      /* user chat-input callout (beat 3) */
+      #qcard {
+        position: absolute; right: 96px; bottom: 176px; width: 640px; opacity: 0;
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 18px;
+        box-shadow: 0 24px 60px rgba(8,15,30,0.35); padding: 20px 20px 20px 24px;
+      }
+      #qcard .qlabel { font-size: 20px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+      #qcard .qrow { display: flex; align-items: center; gap: 14px; }
+      #qcard .qinput {
+        flex: 1; min-height: 40px; font-size: 30px; color: var(--ink); font-weight: 600;
+      }
+      #qcard .qsend {
+        width: 52px; height: 52px; border-radius: 50%; flex: none;
+        background: linear-gradient(135deg, var(--cyan), var(--cyan-lite));
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: 26px; box-shadow: 0 8px 20px rgba(6,182,212,0.5);
+      }
+
+      /* AI answer callout (beat 5) */
+      #acard {
+        position: absolute; right: 70px; top: 150px; width: 700px; opacity: 0;
+        background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px;
+        box-shadow: 0 30px 80px rgba(8,15,30,0.45); padding: 30px 32px;
+      }
+      #acard .ahead { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+      #acard .aicon {
+        width: 40px; height: 40px; border-radius: 11px;
+        background: linear-gradient(135deg, var(--cyan), var(--violet));
+        display: flex; align-items: center; justify-content: center; color: #fff; font-size: 22px; font-weight: 800;
+      }
+      #acard .atitle { font-size: 30px; font-weight: 800; color: var(--ink); }
+      #acard .atag { margin-left: auto; font-size: 17px; color: var(--cyan);
+        border: 1px solid rgba(6,182,212,0.4); border-radius: 20px; padding: 5px 14px; font-weight: 700; }
+      .abullet { display: flex; gap: 16px; margin-bottom: 18px; opacity: 0; }
+      .abullet .bdot { width: 14px; height: 14px; border-radius: 50%; margin-top: 9px; flex: none; }
+      .abullet .btxt { font-size: 24px; line-height: 1.42; color: #1f2a3a; }
+      .abullet .btxt b { color: var(--ink); }
+      #hl {
+        position: absolute; left: 24px; right: 24px; top: 78px; height: 46px; opacity: 0;
+        background: rgba(239,68,68,0.14); border-radius: 8px;
+      }
+
+      /* bottom caption pill */
+      .cap {
+        position: absolute; left: 50%; bottom: 60px; transform: translateX(-50%);
+        background: rgba(9,15,28,0.82); color: #eaf2ff; font-size: 30px; font-weight: 600;
+        padding: 16px 34px; border-radius: 40px; opacity: 0; white-space: nowrap;
+        border: 1px solid rgba(34,211,238,0.35); z-index: 30;
+      }
+      .cap .accent { color: var(--cyan-lite); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="12" data-width="1920" data-height="1080">
+      <div class="scene">
+        <div class="browser">
+          <!-- chrome -->
+          <div class="chrome">
+            <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+            <div class="navbtns"><span>&#8592;</span><span>&#8594;</span></div>
+            <div class="addr">
+              <span class="lock">&#128274;</span>
+              <span class="url-text" id="url-text"></span><span id="caret"></span>
+            </div>
+            <div class="reload">&#8635;</div>
+          </div>
+          <div id="loadbar"></div>
+
+          <!-- viewport + zoomable world -->
+          <div class="viewport">
+            <div class="world" id="world">
+              <div class="page"></div>
+              <img class="shot" id="shot-report" src="assets/shots/uc1-report.png" alt="report" crossorigin="anonymous" />
+              <img class="shot" id="shot-analysis" src="assets/shots/uc1-analysis.png" alt="analysis" crossorigin="anonymous" />
+            </div>
+          </div>
+        </div>
+
+        <!-- HUD overlays -->
+        <div class="hud">
+          <div id="veil"></div>
+
+          <div id="qcard">
+            <div class="qlabel">Hỏi Trợ lý AI về báo cáo</div>
+            <div class="qrow">
+              <div class="qinput" id="qtext"></div>
+              <div class="qsend" id="qsend">&#10148;</div>
+            </div>
+          </div>
+
+          <div id="acard">
+            <div class="ahead">
+              <div class="aicon">AI</div>
+              <div class="atitle">Nhận xét &amp; Phân tích</div>
+              <div class="atag">Trợ lý AI</div>
+            </div>
+            <div id="hl"></div>
+            <div class="abullet"><span class="bdot" style="background:#ef4444"></span><span class="btxt"><b>Sản lượng thực tế = 0</b> — Máy Cuốn Điếu 08 không ghi nhận output toàn bộ Ca 1. KH 65 thùng, trễ 100%.</span></div>
+            <div class="abullet"><span class="bdot" style="background:#06b6d4"></span><span class="btxt"><b>Dừng máy 26 phút</b> đều trong kế hoạch: Đổi cấp liệu (8m) + Bảo dưỡng định kỳ (18m). Không có sự cố bất thường.</span></div>
+            <div class="abullet"><span class="bdot" style="background:#a78bfa"></span><span class="btxt"><b>Khả năng cao:</b> máy vừa xong bảo dưỡng &amp; đổi vật liệu đầu ca, chưa kịp xuất thùng trước khi hết ca.</span></div>
+            <div class="abullet"><span class="bdot" style="background:#f59e0b"></span><span class="btxt"><b>WO LSX26,00005</b> (1.000 thùng) mới bắt đầu 20/05/2026 — tiến độ tổng 0%, ngày đầu triển khai.</span></div>
+            <div class="abullet"><span class="bdot" style="background:#64748b"></span><span class="btxt">Operator: Nguyễn Văn An (00072) · Trưởng ca: Bồ Quang Phú (00046).</span></div>
+          </div>
+        </div>
+
+        <!-- captions -->
+        <div class="cap" id="cap1">Mở <span class="accent">DxFactory</span> · Trung tâm Báo cáo</div>
+        <div class="cap" id="cap2">Hỏi AI Agent: <span class="accent">“nhận xét và phân tích”</span></div>
+        <div class="cap" id="cap3"><span class="accent">AI Agent</span> phản hồi tức thì</div>
+      </div>
+
+      <script>
+        window.__timelines = window.__timelines || {};
+        var tl = gsap.timeline({ paused: true });
+
+        // ---------- virtual camera ----------
+        var world = document.getElementById("world");
+        var cam = { scale: 1, x: 0, y: 0 };
+        function applyCamera() {
+          world.style.transform = "translate(" + cam.x + "px," + cam.y + "px) scale(" + cam.scale + ")";
+        }
+        applyCamera();
+
+        // ---------- 1. type the URL ----------
+        var url = "dxfac.com/trung-tam-bao-cao";
+        var urlEl = document.getElementById("url-text");
+        var up = { n: 0 };
+        tl.to(up, {
+          n: url.length, duration: 1.7, ease: "none",
+          onUpdate: function () { urlEl.textContent = url.slice(0, Math.round(up.n)); }
+        }, 0.4);
+
+        // blinking caret (finite blinks across the whole comp)
+        tl.fromTo("#caret", { opacity: 1 }, { opacity: 0, duration: 0.45, repeat: 25, yoyo: true, ease: "steps(1)" }, 0.0);
+
+        // caption 1
+        tl.fromTo("#cap1", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.5);
+        tl.to("#cap1", { opacity: 0, duration: 0.35, ease: "power2.in" }, 3.3);
+
+        // ---------- 2. page loads ----------
+        tl.fromTo("#loadbar", { scaleX: 0 }, { scaleX: 1, duration: 0.55, ease: "power1.inOut" }, 2.45);
+        tl.to("#loadbar", { opacity: 0, duration: 0.2 }, 3.05);
+        tl.fromTo("#shot-report", { opacity: 0, scale: 1.02 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, 2.75);
+
+        // ---------- 3. zoom toward the AI panel ----------
+        tl.to(cam, { scale: 1.34, x: -300, y: 0, duration: 1.4, ease: "power3.inOut", onUpdate: applyCamera }, 3.6);
+        tl.to("#veil", { opacity: 1, duration: 0.8, ease: "power2.out" }, 3.8);
+
+        // user types the question into the assistant input
+        tl.fromTo("#qcard", { opacity: 0, y: 30, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.5)" }, 4.5);
+        tl.fromTo("#cap2", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 4.5);
+        var q = "nhận xét và phân tích";
+        var qEl = document.getElementById("qtext");
+        var qp = { n: 0 };
+        tl.to(qp, {
+          n: q.length, duration: 1.1, ease: "none",
+          onUpdate: function () { qEl.textContent = q.slice(0, Math.round(qp.n)); }
+        }, 4.9);
+        // send button pulse when done
+        tl.to("#qsend", { scale: 1.18, duration: 0.16, ease: "power2.out", overwrite: "auto" }, 6.15);
+        tl.to("#qsend", { scale: 1.0, duration: 0.22, ease: "power2.in", overwrite: "auto" }, 6.34);
+
+        // ---------- 4. crossfade report -> analysis ----------
+        tl.to("#qcard", { opacity: 0, y: -16, duration: 0.35, ease: "power2.in" }, 6.6);
+        tl.to("#cap2", { opacity: 0, duration: 0.3 }, 6.6);
+        tl.to("#shot-report", { opacity: 0, duration: 0.55, ease: "power1.inOut" }, 6.7);
+        tl.to("#shot-analysis", { opacity: 1, duration: 0.55, ease: "power1.inOut" }, 6.7);
+
+        // ---------- 5. push in on the answer + reveal crisp card ----------
+        tl.to(cam, { scale: 1.5, x: -380, y: -70, duration: 1.3, ease: "power3.inOut", onUpdate: applyCamera }, 7.3);
+        tl.fromTo("#acard", { opacity: 0, y: 34, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, 7.7);
+        tl.fromTo("#cap3", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 7.9);
+
+        // staggered bullets
+        tl.to(".abullet", { opacity: 1, duration: 0.4, stagger: 0.18, ease: "power2.out" }, 8.1);
+        // highlight the critical (red) line
+        tl.fromTo("#hl", { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, transformOrigin: "left center", duration: 0.5, ease: "power2.out" }, 9.3);
+
+        window.__timelines["main"] = tl;
+      </script>
+    </div>
+  </body>
+</html>

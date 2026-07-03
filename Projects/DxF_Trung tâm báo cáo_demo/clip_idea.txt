@@ -1,0 +1,41 @@
+ý tưởng clip demo sản phẩm
+
+Truy cập vào http://demo.indus.nois.vn/dxmpm/pages/report-hub, chọn loại Báo cáo hoạt động máy, chọn ngày 14/06/2026
+
+bấm vào agent và hỏi "phân tích báo cáo hoạt động máy"
+
+agent trích xuất dữ liệu, phân tích và trả lời
+
+Luồng truy cập vào hệ thống
+
+1. http://demo.indus.nois.vn/sign-in?redirectURL=%2Fportal
+> chọn tổ chức New Ocean IS (nois)
+> user name: admin@nois.vn
+> password: Sm@rt!123
+
+2. access vào màn hình http://demo.indus.nois.vn/portal
+> chọn card DxMPM
+
+3. access vào màn hình http://demo.indus.nois.vn/dxmpm/pages/home
+> tại left menu, chọn Trung tâm Báo cáo
+
+4. access vào màn hình http://demo.indus.nois.vn/dxmpm/pages/report-hub
+> tại cột báo cáo, bấm chọn expand Báo cáo hoạt động máy
+> tại khung expanded, chọn tiếp ngày 14/06, màn hình widget hiển thị dashboard báo cáo của ngày 14/06
+> qua khung chat "Trợ lý AI", kéo khung chat mở rộng qua bên trái hết cỡ, sau đó bấm vào khung chat bên dưới, type "phân tích báo cáo hoạt động máy" và enter
+
+5. Đợi agent trích dữ liệu và xử lý thông tin, sau đó agent trả kết quả tại khung chat
+> kéo từ từ xuống hết toàn bộ khung chat để mô phỏng việc user đang đọc thông tin trả về
+
+Một số lưu ý:
+Việc agent response đang tốn nhiều thời gian, do đó khi dựng clip cần tua nhanh đoạn agent reasoning và xử lý data để đi đến đoạn agent trả respone
+
+đoạn truy cập từ ngoài vào đến phần Trung tâm báo cáo có thể đi nhanh, chủ yếu cần tập trung vào đoạn khi đã access được vào Trung tâm báo cáo
+
+cần zoom in zoom out nhấn nhá các object quan trọng trên màn hình khi hỏi & agent trả lời, đặc biệt khi agent reponsed thì nên có cách thể hiện được nội dung reponsed của agent
+
+Có thể sử dụng footage từ slide ppt "DxFactory Operations Intelligence_Usecase 1_Automate report & drilldown" để minh hoạ thêm
+
+Dùng playwright để quay footage từ phần mềm
+
+Clip dài 60 giây, thể hiện được điểm mạnh của giải pháp và show case được demo tính năng thật, chạy trên nền nhạc nhẹ nhàng vui tươi, kèm theo là narration tiếng việt, các keywords tiếng anh sẽ phiên âm cho thuận tai nghe của người dùng theo phiên âm tiếng anh (ví dụ: ây ai, đi ếch phách to ri...), lưu ý narration cũng phải có tông giọng nữ, vui tươi, có nhấn nhá, có sức truyền cảm

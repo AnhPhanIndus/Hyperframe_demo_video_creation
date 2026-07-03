@@ -1,0 +1,35 @@
+phân tích báo cáo hoạt động máy
+
+Đã nắm được schema. Đang lấy danh sách nhà máy trước để xác định plantIds:
+
+Đã có 3 nhà máy. Bây giờ gọi dashboard tổng hợp + downtime song song:
+
+Đây là kết quả phân tích Báo cáo Hoạt động Máy toàn bộ 3 nhà máy (Thăng Long, Xưởng In, Cây Đầu Lọc), giai đoạn 01/04 – 03/07/2026:
+
+📊 Tổng quan
+Chỉ số	Giá trị
+Tổng sự cố phát sinh (ngoài kế hoạch)	83 lần
+Máy dừng nhiều nhất	K12 — 743,6 giờ
+MTTR cao nhất	NISHI1 — 25,84 giờ/lần
+% Phát sinh cao nhất	ATN7 — 35,2%
+🔴 Top máy có downtime cao nhất
+
+K12 (743h) › K11 (723h) › K14 (693h) dẫn đầu — các máy K-series chiếm toàn bộ top 10, cho thấy đây là nhóm máy chịu tải bảo trì lớn nhất.
+
+⚡ Máy sự cố ngoài kế hoạch nhiều nhất
+ATN6 & K11: đồng dẫn đầu — 10 sự cố/máy
+K1, ATN8: 9 sự cố — đặc biệt K1 nằm ngoài top downtime nhưng sự cố nhiều → thời gian xử lý mỗi lần ngắn
+Tổng cộng 83 sự cố phát sinh trong 94 ngày ~ gần 1 sự cố/ngày toàn hệ thống
+⏱️ MTTR đáng chú ý
+Máy	MTTR (giờ/lần)	Số lần	Tổng TG
+NISHI1	25,84	1	25,84h
+KP1	4,47	4	17,87h
+K4	1,17	7	8,21h
+K6	1,15	9	10,31h
+
+NISHI1 có 1 sự cố nhưng mất gần 26 giờ để khắc phục → sự cố phức tạp, nên cân nhắc lên kế hoạch bảo trì phòng ngừa.
+
+🔧 Nhận xét tổng hợp
+K12, K11, K14 là 3 máy cần ưu tiên số 1 về lập kế hoạch bảo trì — downtime trên 690 giờ/3 tháng (>7 giờ/ngày), chiếm phần lớn là bảo trì theo kế hoạch nhưng tỷ lệ phát sinh của K11 (17%), K12 (20%), K14 (28%) vẫn đáng lo.
+ATN7, ATN4, K6 có tỷ lệ sửa chữa phát sinh cao (>27%) — cần rà soát nguyên nhân gốc rễ để chuyển sang bảo trì phòng ngừa, giảm dừng máy bất ngờ.
+ATN6 & K11 dẫn đầu tần suất sự cố (10 lần) — nên xem xét lịch bảo dưỡng định kỳ hoặc thay thế linh kiện hay hỏng.

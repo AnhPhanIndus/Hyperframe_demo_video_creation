@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #05070d;
+        font-family: "Inter", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ── persistent animated background ─────────────────────────── */
+      #bg {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        background: radial-gradient(120% 120% at 50% 28%, #0b1226 0%, #06080f 58%, #03040a 100%);
+      }
+      .glow {
+        position: absolute;
+        width: 1200px;
+        height: 1200px;
+        border-radius: 50%;
+        filter: blur(30px);
+        mix-blend-mode: screen;
+        will-change: transform;
+      }
+      .glowA {
+        left: -260px;
+        top: -300px;
+        background: radial-gradient(circle, rgba(34, 211, 238, 0.5) 0%, rgba(34, 211, 238, 0) 64%);
+      }
+      .glowB {
+        right: -320px;
+        bottom: -340px;
+        background: radial-gradient(circle, rgba(124, 58, 237, 0.55) 0%, rgba(124, 58, 237, 0) 64%);
+      }
+      #grid {
+        position: absolute;
+        left: 50%;
+        bottom: -14%;
+        width: 3200px;
+        height: 1500px;
+        transform: translateX(-50%) perspective(680px) rotateX(71deg);
+        transform-origin: center bottom;
+        opacity: 0.32;
+        -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0) 72%);
+        mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0) 72%);
+      }
+      .grid-plane {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: -50%;
+        height: 200%;
+        background-image: linear-gradient(rgba(34, 211, 238, 0.55) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(34, 211, 238, 0.32) 1px, transparent 1px);
+        background-size: 130px 130px;
+        will-change: transform;
+      }
+      #particles {
+        position: absolute;
+        inset: 0;
+      }
+      .pixel {
+        position: absolute;
+        border-radius: 50%;
+        will-change: transform, opacity;
+      }
+      #vignette {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(118% 88% at 50% 46%, rgba(0, 0, 0, 0) 44%, rgba(2, 3, 8, 0.72) 100%);
+      }
+      #scan {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.35;
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(180, 220, 255, 0.025) 0px,
+          rgba(180, 220, 255, 0.025) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+      }
+
+      /* ── scenes ─────────────────────────────────────────────────── */
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #s1 { z-index: 3; }
+      #s2 { z-index: 4; opacity: 0; }
+      #s3 { z-index: 5; opacity: 0; }
+      #s4 { z-index: 6; opacity: 0; }
+      #s5 { z-index: 7; opacity: 0; }
+      #s6 { z-index: 8; opacity: 0; }
+
+      .wrap {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+      }
+      .center {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 30px;
+        padding: 130px 180px;
+      }
+      .left {
+        align-items: flex-start;
+        justify-content: center;
+        text-align: left;
+        gap: 30px;
+        padding: 150px 200px;
+      }
+      .col {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 56px;
+        padding: 110px 130px;
+      }
+
+      /* shared type */
+      .eyebrow,
+      .kicker {
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: #22d3ee;
+      }
+      .lede {
+        font-size: 40px;
+        font-weight: 300;
+        color: #cfe0f8;
+        letter-spacing: 0.3px;
+        max-width: 1200px;
+      }
+      .accent-text {
+        background: linear-gradient(100deg, #22d3ee, #a78bfa);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      /* scene 1 — title */
+      .title-hero {
+        font-size: 208px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -3px;
+        background: linear-gradient(100deg, #22d3ee 0%, #67e8f9 35%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        filter: drop-shadow(0 0 46px rgba(34, 211, 238, 0.3));
+      }
+      .rule {
+        width: 460px;
+        height: 2px;
+        background: #22d3ee;
+        box-shadow: 0 0 14px rgba(34, 211, 238, 0.8);
+        transform: scaleX(0);
+        transform-origin: center;
+      }
+
+      /* scene 2 — positioning */
+      .vbar {
+        width: 8px;
+        height: 132px;
+        border-radius: 4px;
+        background: linear-gradient(180deg, #22d3ee, #7c3aed);
+        box-shadow: 0 0 22px rgba(34, 211, 238, 0.4);
+        transform: scaleY(0);
+        transform-origin: top center;
+      }
+      .headline {
+        font-size: 86px;
+        font-weight: 600;
+        line-height: 1.08;
+        letter-spacing: -1px;
+        color: #eaf2ff;
+        max-width: 1440px;
+      }
+      .subline {
+        font-size: 34px;
+        font-weight: 300;
+        line-height: 1.45;
+        color: #9fb6df;
+        max-width: 1120px;
+      }
+
+      /* scene 3 — pillars */
+      .pillars {
+        display: flex;
+        gap: 36px;
+        width: 100%;
+        justify-content: center;
+        max-width: 1560px;
+      }
+      .pillar {
+        flex: 1;
+        max-width: 500px;
+        background: rgba(12, 20, 38, 0.62);
+        border: 1px solid rgba(34, 211, 238, 0.22);
+        border-radius: 22px;
+        padding: 46px 42px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        gap: 20px;
+        box-shadow: 0 18px 50px rgba(2, 6, 18, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      }
+      .p-num {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 30px;
+        font-weight: 700;
+        color: #05070d;
+        background: linear-gradient(135deg, #22d3ee, #a78bfa);
+        width: 64px;
+        height: 64px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 24px rgba(34, 211, 238, 0.35);
+      }
+      .pillar h3 {
+        font-size: 42px;
+        font-weight: 600;
+        color: #eaf2ff;
+        line-height: 1.1;
+      }
+      .pillar p {
+        font-size: 25px;
+        font-weight: 300;
+        color: #9fb6df;
+        line-height: 1.4;
+      }
+
+      /* scene 4 — module suite */
+      .grid-mods {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        width: 100%;
+        max-width: 1540px;
+      }
+      .mod {
+        background: rgba(12, 20, 38, 0.72);
+        border: 1px solid rgba(34, 211, 238, 0.22);
+        border-radius: 16px;
+        padding: 26px 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      }
+      .mod .code {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 700;
+        font-size: 33px;
+        color: #22d3ee;
+        letter-spacing: -0.5px;
+      }
+      .mod .mname {
+        font-size: 22px;
+        font-weight: 300;
+        color: #cfe0f8;
+      }
+
+      /* scene 5 — stats */
+      .stats {
+        display: flex;
+        gap: 44px;
+        justify-content: center;
+        width: 100%;
+        max-width: 1500px;
+      }
+      .stat {
+        flex: 1;
+        max-width: 460px;
+        background: rgba(12, 20, 38, 0.52);
+        border: 1px solid rgba(34, 211, 238, 0.22);
+        border-radius: 22px;
+        padding: 48px 38px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 18px 50px rgba(2, 6, 18, 0.5);
+      }
+      .big {
+        font-size: 104px;
+        font-weight: 700;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+        background: linear-gradient(100deg, #22d3ee, #a78bfa);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .slabel {
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #9fb6df;
+      }
+      .costline {
+        font-size: 32px;
+        font-weight: 300;
+        color: #cfe0f8;
+        letter-spacing: 0.3px;
+      }
+      .costline b {
+        font-weight: 600;
+        color: #22d3ee;
+      }
+
+      /* scene 6 — outro */
+      .title-hero.small {
+        font-size: 156px;
+      }
+      .contact {
+        font-size: 30px;
+        font-weight: 400;
+        color: #9fb6df;
+        letter-spacing: 0.04em;
+      }
+      .contact b {
+        color: #cfe0f8;
+        font-weight: 600;
+      }
+
+      #blackout {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        background: #03040a;
+        opacity: 0;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-at0g" id="root" data-composition-id="main" data-start="0" data-duration="20" data-width="1920" data-height="1080">
+      <audio data-hf-id="hf-s3ei" id="bgm" data-start="0" data-duration="20" data-track-index="0" src="assets/bgm/track.wav" data-volume="0.92"></audio>
+
+      <!-- persistent living background (decorative — excluded from layout audit) -->
+      <div data-hf-id="hf-5qeh" id="bg" data-layout-ignore="">
+        <div data-hf-id="hf-7n26" class="glow glowA" data-layout-ignore=""></div>
+        <div data-hf-id="hf-y091" class="glow glowB" data-layout-ignore=""></div>
+        <div data-hf-id="hf-ika0" id="grid" data-layout-ignore=""><div data-hf-id="hf-4orp" class="grid-plane"></div></div>
+        <div data-hf-id="hf-ha8p" id="particles" data-layout-ignore=""></div>
+        <div data-hf-id="hf-6f4b" id="scan" data-layout-ignore=""></div>
+        <div data-hf-id="hf-3obq" id="vignette" data-layout-ignore=""></div>
+      </div>
+
+      <!-- SCENE 1 — Title (fade-in) -->
+      <div data-hf-id="hf-yihu" id="s1" class="scene">
+        <div data-hf-id="hf-9ibb" class="wrap center">
+          <div data-hf-id="hf-ynnk" class="eyebrow">NEW OCEAN GROUP &#160;·&#160; CÔNG NGHỆ 4.0</div>
+          <h1 data-hf-id="hf-ab4p" class="title-hero">DxFACTORY</h1>
+          <div data-hf-id="hf-a46i" class="rule"></div>
+          <p data-hf-id="hf-5s0j" class="lede">Giải pháp <span data-hf-id="hf-b1ew" class="accent-text">Nhà máy số</span> toàn diện cho sản xuất</p>
+        </div>
+      </div>
+
+      <!-- SCENE 2 — Positioning -->
+      <div data-hf-id="hf-ukdt" id="s2" class="scene">
+        <div data-hf-id="hf-wd27" class="wrap left">
+          <div data-hf-id="hf-y26p" class="vbar"></div>
+          <div data-hf-id="hf-ojta" class="eyebrow">Chuyển đổi số sản xuất</div>
+          <h2 data-hf-id="hf-r3ht" class="headline">
+            Số hóa <span data-hf-id="hf-gwr8" class="accent-text">toàn bộ nhà máy</span> trên một nền tảng duy nhất
+          </h2>
+          <p data-hf-id="hf-1bnh" class="subline">
+            Ứng dụng công nghệ 4.0 để tối ưu hiệu suất, cắt giảm chi phí vận hành và sử dụng nguồn lực
+            hiệu quả hơn.
+          </p>
+        </div>
+      </div>
+
+      <!-- SCENE 3 — 3 Pillars -->
+      <div data-hf-id="hf-tsq0" id="s3" class="scene">
+        <div data-hf-id="hf-yd8a" class="wrap col">
+          <div data-hf-id="hf-qgqf" class="kicker">Điểm nổi bật</div>
+          <div data-hf-id="hf-autr" class="pillars">
+            <div data-hf-id="hf-3dhw" class="pillar">
+              <div data-hf-id="hf-zkdg" class="p-num">01</div>
+              <h3 data-hf-id="hf-3ox8">Tích hợp toàn diện</h3>
+              <p data-hf-id="hf-9erc">Phần cứng &amp; phần mềm từ một nhà cung cấp duy nhất.</p>
+            </div>
+            <div data-hf-id="hf-b8do" class="pillar">
+              <div data-hf-id="hf-ydgd" class="p-num">02</div>
+              <h3 data-hf-id="hf-m5fa">Hệ thống trực quan</h3>
+              <p data-hf-id="hf-h6eh">Dashboard thời gian thực, dễ vận hành cho mọi cấp.</p>
+            </div>
+            <div data-hf-id="hf-a1gl" class="pillar">
+              <div data-hf-id="hf-yrre" class="p-num">03</div>
+              <h3 data-hf-id="hf-45u5">Tối ưu hiệu suất</h3>
+              <p data-hf-id="hf-j0cn">Dữ liệu sản xuất liên tục, ra quyết định tức thì.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 4 — Module suite -->
+      <div data-hf-id="hf-pulz" id="s4" class="scene">
+        <div data-hf-id="hf-59ge" class="wrap col">
+          <div data-hf-id="hf-vwl2" class="kicker">Một nền tảng — nhiều giải pháp</div>
+          <div data-hf-id="hf-yc2m" class="grid-mods">
+            <div data-hf-id="hf-ygck" class="mod"><span data-hf-id="hf-s3ok" class="code">DxAPS</span><span data-hf-id="hf-ywtx" class="mname">Lập kế hoạch &amp; điều độ</span></div>
+            <div data-hf-id="hf-wlmk" class="mod"><span data-hf-id="hf-zgru" class="code">DxMPM</span><span data-hf-id="hf-j1vs" class="mname">Quản lý quy trình sản xuất</span></div>
+            <div data-hf-id="hf-veph" class="mod"><span data-hf-id="hf-mcti" class="code">DxCMMS</span><span data-hf-id="hf-2rj0" class="mname">Quản lý bảo trì thiết bị</span></div>
+            <div data-hf-id="hf-vt0i" class="mod"><span data-hf-id="hf-zu23" class="code">DxWMS</span><span data-hf-id="hf-py38" class="mname">Quản lý kho thông minh</span></div>
+            <div data-hf-id="hf-xsjn" class="mod"><span data-hf-id="hf-inhz" class="code">DxTraceability</span><span data-hf-id="hf-jatl" class="mname">Truy xuất nguồn gốc</span></div>
+            <div data-hf-id="hf-y6uo" class="mod"><span data-hf-id="hf-65h3" class="code">DxIIOT</span><span data-hf-id="hf-bx17" class="mname">Thu thập dữ liệu sản xuất</span></div>
+            <div data-hf-id="hf-wzxl" class="mod"><span data-hf-id="hf-tzqp" class="code">DxQMS</span><span data-hf-id="hf-cwwt" class="mname">Quản lý chất lượng</span></div>
+            <div data-hf-id="hf-xe8m" class="mod"><span data-hf-id="hf-w0gd" class="code">DxOEE</span><span data-hf-id="hf-fib4" class="mname">Phân tích hiệu suất thiết bị</span></div>
+            <div data-hf-id="hf-t0vb" class="mod"><span data-hf-id="hf-gwno" class="code">DxAI</span><span data-hf-id="hf-0gxe" class="mname">Trợ lý AI cho vận hành</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 5 — Value / stats -->
+      <div data-hf-id="hf-lwhy" id="s5" class="scene">
+        <div data-hf-id="hf-5nrf" class="wrap col">
+          <div data-hf-id="hf-yj56" class="kicker">Vì sao chọn DxFACTORY</div>
+          <div data-hf-id="hf-rhep" class="stats">
+            <div data-hf-id="hf-xa0m" class="stat"><div data-hf-id="hf-lhev" class="big">22+</div><div data-hf-id="hf-8xzx" class="slabel">Năm kinh nghiệm</div></div>
+            <div data-hf-id="hf-tx7e" class="stat"><div data-hf-id="hf-qlqp" class="big">9</div><div data-hf-id="hf-a9nc" class="slabel">Giải pháp trong 1 nền tảng</div></div>
+            <div data-hf-id="hf-ubif" class="stat"><div data-hf-id="hf-s0zo" class="big">1–2</div><div data-hf-id="hf-vs70" class="slabel">Tuần để vận hành</div></div>
+          </div>
+          <p data-hf-id="hf-oo1b" class="costline">
+            Rộng hơn cả MES &#160;·&#160; chi phí chỉ tương đương <b data-hf-id="hf-9rp8">~2 ly cà phê / ngày</b>
+          </p>
+        </div>
+      </div>
+
+      <!-- SCENE 6 — Outro / CTA -->
+      <div data-hf-id="hf-hydx" id="s6" class="scene">
+        <div data-hf-id="hf-obg7" class="wrap center">
+          <h1 data-hf-id="hf-2y0u" class="title-hero small">DxFACTORY</h1>
+          <p data-hf-id="hf-g1ut" class="lede">Nhà máy thông minh — bắt đầu từ hôm nay</p>
+          <div data-hf-id="hf-e681" class="contact"><b data-hf-id="hf-02d6">dxfac.com</b> &#160;·&#160; (+84) 973 342 039 &#160;·&#160; infor@dxfac.com</div>
+        </div>
+      </div>
+
+      <div data-hf-id="hf-9vqe" id="blackout"></div>
+    </div>
+
+    <script>
+      // ── deterministic particle field (seeded, no Math.random at runtime) ──
+      function mulberry32(a) {
+        return function () {
+          a |= 0;
+          a = (a + 0x6d2b79f5) | 0;
+          var t = Math.imul(a ^ (a >>> 15), 1 | a);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+      (function buildParticles() {
+        var rng = mulberry32(0x51f2c3a7);
+        var host = document.getElementById("particles");
+        var NP = 46;
+        var html = "";
+        for (var i = 0; i < NP; i++) {
+          var x = (rng() * 1920) | 0;
+          var y = (rng() * 1080) | 0;
+          var s = (1 + rng() * 3.4).toFixed(1);
+          var o = (0.18 + rng() * 0.6).toFixed(2);
+          var col = rng() > 0.62 ? "167,139,250" : "34,211,238";
+          var glow = (s * 3) | 0;
+          html +=
+            '<span class="pixel" style="left:' + x + "px;top:" + y + "px;width:" + s + "px;height:" + s +
+            "px;opacity:" + o + ";background:rgba(" + col + ",1);box-shadow:0 0 " + glow +
+            "px rgba(" + col + ',0.85)"></span>';
+        }
+        host.innerHTML = html;
+      })();
+
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+      var DUR = 20;
+
+      // ── ambient background motion (finite repeats, fully seekable) ──
+      tl.to(".grid-plane", { y: 130, duration: 2.0, ease: "none", repeat: Math.floor(DUR / 2.0) - 1 }, 0);
+      tl.to(".glowA", { x: 360, y: 240, scale: 1.18, duration: 6.5, ease: "sine.inOut", yoyo: true, repeat: 3 }, 0);
+      tl.to(".glowB", { x: -320, y: -210, scale: 1.2, duration: 7.5, ease: "sine.inOut", yoyo: true, repeat: 3 }, 0);
+      tl.to(".pixel", { y: "-=70", duration: 5.5, ease: "sine.inOut", yoyo: true, repeat: 3, stagger: { each: 0.07, from: "start" } }, 0);
+      tl.to(".pixel", { opacity: "+=0.18", duration: 1.6, ease: "sine.inOut", yoyo: true, repeat: Math.floor(DUR / 1.6) - 1, stagger: { each: 0.05, from: "edges" } }, 0);
+
+      // ── transition helper: high-energy blur crossfade ──
+      function blurCross(oldSel, newSel, T) {
+        tl.to(oldSel, { opacity: 0, filter: "blur(6px)", scale: 1.03, duration: 0.4, ease: "power2.inOut" }, T);
+        tl.fromTo(
+          newSel,
+          { opacity: 0, filter: "blur(6px)", scale: 0.97 },
+          { opacity: 1, filter: "blur(0px)", scale: 1, duration: 0.46, ease: "power2.out" },
+          T
+        );
+      }
+
+      // ── SCENE 1 — title fade-in ──
+      tl.from("#s1 .eyebrow", { y: -22, opacity: 0, duration: 0.6, ease: "power2.out" }, 0.3);
+      tl.from("#s1 .title-hero", { y: 44, scale: 0.94, opacity: 0, duration: 1.15, ease: "expo.out" }, 0.55);
+      tl.from("#s1 .rule", { scaleX: 0, duration: 0.85, ease: "power3.inOut" }, 1.0);
+      tl.from("#s1 .lede", { y: 26, opacity: 0, duration: 0.8, ease: "back.out(1.4)" }, 1.25);
+
+      // ── transition 1 ──
+      blurCross("#s1", "#s2", 3.5);
+
+      // ── SCENE 2 — positioning ──
+      tl.from("#s2 .vbar", { scaleY: 0, opacity: 0, duration: 0.6, ease: "power3.out" }, 3.55);
+      tl.from("#s2 .eyebrow", { x: -30, opacity: 0, duration: 0.6, ease: "power2.out" }, 3.7);
+      tl.from("#s2 .headline", { y: 44, opacity: 0, duration: 0.85, ease: "expo.out" }, 3.85);
+      tl.from("#s2 .subline", { y: 26, opacity: 0, duration: 0.75, ease: "back.out(1.3)" }, 4.1);
+
+      // ── transition 2 ──
+      blurCross("#s2", "#s3", 6.7);
+
+      // ── SCENE 3 — pillars ──
+      tl.from("#s3 .kicker", { y: -22, opacity: 0, duration: 0.6, ease: "power2.out" }, 6.75);
+      tl.from("#s3 .pillar", { y: 72, scale: 0.94, opacity: 0, duration: 0.72, ease: "back.out(1.5)", stagger: 0.13 }, 6.95);
+      tl.from("#s3 .p-num", { scale: 0, opacity: 0, duration: 0.55, ease: "back.out(2)", stagger: 0.13 }, 7.1);
+
+      // ── transition 3 ──
+      blurCross("#s3", "#s4", 9.9);
+
+      // ── SCENE 4 — module suite ──
+      tl.from("#s4 .kicker", { y: -22, opacity: 0, duration: 0.6, ease: "power2.out" }, 9.95);
+      tl.from("#s4 .mod", { y: 52, scale: 0.9, opacity: 0, duration: 0.55, ease: "back.out(1.4)", stagger: { each: 0.05, from: "start" } }, 10.15);
+      tl.from("#s4 .mname", { y: 10, opacity: 0, duration: 0.4, ease: "power1.out", stagger: { each: 0.05, from: "start" } }, 10.4);
+
+      // ── transition 4 ──
+      blurCross("#s4", "#s5", 13.3);
+
+      // ── SCENE 5 — stats ──
+      tl.from("#s5 .kicker", { y: -22, opacity: 0, duration: 0.6, ease: "power2.out" }, 13.35);
+      tl.from("#s5 .stat", { y: 64, scale: 0.94, opacity: 0, duration: 0.62, ease: "back.out(1.5)", stagger: 0.13 }, 13.55);
+      tl.from("#s5 .big", { scale: 0.55, opacity: 0, duration: 0.6, ease: "expo.out", stagger: 0.13 }, 13.7);
+      tl.from("#s5 .costline", { y: 22, opacity: 0, duration: 0.6, ease: "power2.out" }, 14.5);
+
+      // ── transition 5 ──
+      blurCross("#s5", "#s6", 16.6);
+
+      // ── SCENE 6 — outro ──
+      tl.from("#s6 .title-hero", { y: 32, scale: 0.95, opacity: 0, duration: 0.95, ease: "expo.out" }, 16.7);
+      tl.from("#s6 .lede", { y: 22, opacity: 0, duration: 0.7, ease: "power2.out" }, 17.05);
+      tl.from("#s6 .contact", { y: 18, opacity: 0, duration: 0.7, ease: "back.out(1.3)" }, 17.4);
+
+      // ── final fade to black (final scene only — exit allowed) ──
+      tl.to("#blackout", { opacity: 1, duration: 0.7, ease: "power2.in" }, 19.3);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

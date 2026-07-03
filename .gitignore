@@ -1,0 +1,17 @@
+# ===== Dependencies =====
+node_modules/
+
+# ===== ffmpeg temp working directories (heavy, regenerable) =====
+**/renders/work-*/
+
+# ===== Raw screen recordings / capture artifacts (regenerable) =====
+**/recorder/full.mp4
+**/recorder/video/
+**/recorder/trace/
+*.webm
+
+# ===== OS / editor junk =====
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log

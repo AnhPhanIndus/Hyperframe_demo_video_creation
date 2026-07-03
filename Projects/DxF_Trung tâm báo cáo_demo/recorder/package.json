@@ -1,0 +1,1 @@
+{ "name": "dxf-recorder", "private": true, "type": "module", "dependencies": { "playwright": "1.61.1" } }

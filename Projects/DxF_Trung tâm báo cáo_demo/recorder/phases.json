@@ -1,0 +1,38 @@
+[
+  {
+    "name": "home",
+    "ms": 6888
+  },
+  {
+    "name": "reporthub",
+    "ms": 13168
+  },
+  {
+    "name": "expanded",
+    "ms": 16904
+  },
+  {
+    "name": "dashboard",
+    "ms": 24423
+  },
+  {
+    "name": "typed",
+    "ms": 30664
+  },
+  {
+    "name": "sent",
+    "ms": 30686
+  },
+  {
+    "name": "answer_start",
+    "ms": 232701
+  },
+  {
+    "name": "answer_stable",
+    "ms": 256827
+  },
+  {
+    "name": "scrolled",
+    "ms": 263242
+  }
+]

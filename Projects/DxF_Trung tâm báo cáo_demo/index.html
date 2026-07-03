@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --bg-deep: #05070d; --bg-panel: #0c1426; --ink: #eaf2ff; --muted: #9fb6df;
+        --cyan: #22d3ee; --cyan-deep: #06b6d4; --violet: #a78bfa; --violet-deep: #7c3aed;
+        --line: rgba(34,211,238,0.22);
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+        background: #03040a; font-family: "Inter", Arial, sans-serif; color: var(--ink); }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; }
+      .scene { position: absolute; inset: 0; }
+
+      /* persistent dark backdrop (intro/outro) */
+      #bg { position: absolute; inset: 0; z-index: 0;
+        background:
+          radial-gradient(120% 90% at 30% 20%, rgba(34,211,238,0.12), transparent 55%),
+          radial-gradient(120% 100% at 80% 90%, rgba(124,58,237,0.16), transparent 55%),
+          linear-gradient(160deg, #060a14 0%, #03040a 60%); }
+      .grid { position: absolute; inset: -10% -10% 30% -10%; opacity: 0.20;
+        background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+        background-size: 64px 64px; transform: perspective(700px) rotateX(58deg); transform-origin: 50% 100%; }
+
+      /* ---------- video layer ---------- */
+      #video-wrap { position: absolute; inset: 0; z-index: 4; overflow: hidden; opacity: 0;
+        transform-origin: 50% 50%; will-change: transform; background: #0b1220; }
+      #video-wrap video { width: 100%; height: 100%; object-fit: cover; }
+      #veil { position: absolute; inset: 0; z-index: 5; opacity: 0;
+        background: linear-gradient(90deg, rgba(3,6,14,0.86) 0%, rgba(3,6,14,0.72) 42%, rgba(3,6,14,0.30) 72%, rgba(3,6,14,0.10) 100%); }
+
+      /* ---------- intro ---------- */
+      #intro { z-index: 12; display: flex; align-items: center; justify-content: center; }
+      .intro-wrap { width: 100%; max-width: 1780px; padding: 0 50px; text-align: center; }
+      .eyebrow { font-size: 26px; font-weight: 700; letter-spacing: 0.42em; color: var(--cyan);
+        text-transform: uppercase; margin-bottom: 34px; }
+      .hook1 { font-size: 84px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; white-space: nowrap; }
+      .hook2 { font-size: 72px; font-weight: 700; line-height: 1.1; margin-top: 18px; color: var(--muted); }
+      .accent { background: linear-gradient(100deg, var(--cyan), var(--violet)); -webkit-background-clip: text;
+        background-clip: text; color: transparent; }
+      /* brand lockup */
+      .brand { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+        justify-content: center; opacity: 0; }
+      .wordmark { font-size: 150px; font-weight: 900; letter-spacing: -0.03em; }
+      .wordmark .x { color: var(--cyan); }
+      .rule { width: 0; height: 4px; margin: 30px 0 26px; border-radius: 4px;
+        background: linear-gradient(90deg, var(--cyan), var(--violet)); }
+      .tagline { font-size: 40px; font-weight: 500; color: var(--muted); }
+
+      /* ---------- footage beat chip (top-left) ---------- */
+      .chip { position: absolute; left: 60px; top: 54px; z-index: 8; opacity: 0;
+        display: flex; align-items: center; gap: 14px; padding: 16px 26px; border-radius: 999px;
+        background: rgba(8,14,30,0.82); border: 1px solid var(--line); backdrop-filter: blur(4px); }
+      .chip .spark { width: 30px; height: 30px; border-radius: 8px;
+        background: linear-gradient(135deg, var(--cyan), var(--violet)); display: flex; align-items: center;
+        justify-content: center; font-weight: 800; font-size: 16px; color: #04121a; }
+      .chip .ctxt { font-size: 27px; font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; }
+      .chip .ctxt b { color: var(--cyan); }
+
+      /* ---------- insight overlay ---------- */
+      #insights { z-index: 10; }
+      .ins-head { position: absolute; left: 90px; top: 96px; display: flex; align-items: center; gap: 16px; opacity: 0; }
+      .ins-head .ai { width: 52px; height: 52px; border-radius: 13px; background: linear-gradient(135deg, var(--cyan), var(--violet));
+        display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 24px; color: #04121a; }
+      .ins-head .t { font-size: 34px; font-weight: 800; }
+      .ins-head .t small { display: block; font-size: 20px; font-weight: 600; color: var(--cyan); letter-spacing: 0.16em; }
+
+      .stat-row { position: absolute; left: 90px; top: 208px; display: flex; gap: 30px; }
+      .stat { width: 380px; padding: 30px 34px; border-radius: 22px; background: rgba(10,18,34,0.9);
+        border: 1px solid var(--line); opacity: 0; }
+      .stat .num { font-size: 108px; font-weight: 900; line-height: 1; letter-spacing: -0.03em;
+        font-variant-numeric: tabular-nums; }
+      .stat .lab { font-size: 28px; font-weight: 600; color: var(--muted); margin-top: 10px; }
+      .stat.red .num { color: #fb7185; }
+      .stat.cyan .num { background: linear-gradient(100deg, var(--cyan), var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+      .act { position: absolute; left: 90px; width: 800px; padding: 26px 32px; border-radius: 20px;
+        background: rgba(10,18,34,0.9); border: 1px solid var(--line); opacity: 0; }
+      #act1 { top: 470px; } #act2 { top: 610px; }
+      .act .h { font-size: 26px; font-weight: 700; color: var(--muted); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+      .act .dot { width: 14px; height: 14px; border-radius: 50%; }
+      .pills { display: flex; gap: 14px; }
+      .pill { padding: 12px 26px; border-radius: 999px; font-size: 34px; font-weight: 800; letter-spacing: 0.02em;
+        background: rgba(34,211,238,0.12); border: 1px solid rgba(34,211,238,0.4); color: var(--ink); font-variant-numeric: tabular-nums; }
+      #act2 .pill { background: rgba(251,113,133,0.12); border-color: rgba(251,113,133,0.42); }
+      .mttr { position: absolute; left: 90px; top: 754px; font-size: 27px; color: var(--muted); opacity: 0; }
+      .mttr b { color: var(--ink); }
+
+      /* ---------- captions ---------- */
+      .cap { position: absolute; left: 50%; bottom: 66px; transform: translateX(-50%); z-index: 16;
+        max-width: 1500px; text-align: center; font-size: 40px; font-weight: 700; opacity: 0;
+        padding: 18px 40px; border-radius: 18px; background: rgba(3,6,14,0.72);
+        border: 1px solid var(--line); white-space: nowrap; }
+      .cap .k { color: var(--cyan); }
+
+      /* ---------- outro ---------- */
+      #outro { z-index: 18; display: flex; align-items: center; justify-content: center; opacity: 0; }
+      .outro-wrap { text-align: center; }
+      .outro-wrap .wordmark { font-size: 128px; }
+      .outro-tag { font-size: 46px; font-weight: 600; margin-top: 8px; }
+      .outro-sub { font-size: 30px; color: var(--muted); margin-top: 30px; letter-spacing: 0.04em; }
+      .outro-sub b { color: var(--cyan); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="62" data-width="1920" data-height="1080">
+      <audio id="au" data-start="0" data-duration="62" data-track-index="0" src="assets/master.m4a" data-volume="1"></audio>
+
+      <!-- backdrop -->
+      <div id="bg" data-layout-ignore=""><div class="grid" data-layout-ignore=""></div></div>
+
+      <!-- footage -->
+      <div id="video-wrap">
+        <video id="footage" src="assets/footage.mp4" muted playsinline
+               data-start="12.5" data-duration="39.5" data-track-index="1"></video>
+      </div>
+      <div id="veil" data-layout-ignore=""></div>
+
+      <!-- beat chips (crossfade) -->
+      <div id="chip1" class="chip"><div class="spark">Dx</div><div class="ctxt">Trung tâm Báo cáo</div></div>
+      <div id="chip2" class="chip"><div class="spark">Dx</div><div class="ctxt">Báo cáo Hoạt động Máy · <b>14/06</b></div></div>
+      <div id="chip3" class="chip"><div class="spark">Dx</div><div class="ctxt">Hỏi <b>Trợ lý AI</b></div></div>
+
+      <!-- intro -->
+      <div id="intro" class="scene">
+        <div class="intro-wrap" id="hook">
+          <div class="eyebrow">NHÀ MÁY SẢN XUẤT 4.0</div>
+          <div class="hook1">Hàng nghìn con số <span class="accent">mỗi ca</span>.</div>
+          <div class="hook2">Nhưng ai kịp đọc, ai kịp hiểu?</div>
+        </div>
+        <div class="brand" id="brand">
+          <div class="wordmark">Dx<span class="x">Factory</span></div>
+          <div class="rule" id="brule"></div>
+          <div class="tagline">Nền tảng <span class="accent">AI</span> cho nhà máy thông minh</div>
+        </div>
+      </div>
+
+      <!-- insight overlay -->
+      <div id="insights" class="scene">
+        <div class="ins-head" id="ins-head"><div class="ai">AI</div><div class="t"><small>TRỢ LÝ AI · PHÂN TÍCH</small>Kết quả tức thì</div></div>
+        <div class="stat-row">
+          <div class="stat red" id="st1"><div class="num" id="st1n">0</div><div class="lab">sự cố ngoài kế hoạch</div></div>
+          <div class="stat cyan" id="st2"><div class="num">743h</div><div class="lab">K12 — máy dừng lâu nhất</div></div>
+        </div>
+        <div class="act" id="act1">
+          <div class="h"><span class="dot" style="background:var(--cyan)"></span>Ưu tiên lập kế hoạch bảo trì</div>
+          <div class="pills"><span class="pill">K12</span><span class="pill">K11</span><span class="pill">K14</span></div>
+        </div>
+        <div class="act" id="act2">
+          <div class="h"><span class="dot" style="background:#fb7185"></span>Cần rà soát nguyên nhân gốc rễ</div>
+          <div class="pills"><span class="pill">ATN7</span><span class="pill">ATN4</span><span class="pill">K6</span></div>
+        </div>
+        <div class="mttr" id="mttr">MTTR cao nhất: <b>NISHI1 — 25,8 giờ/lần</b></div>
+      </div>
+
+      <!-- captions -->
+      <div class="cap" id="c1">Hàng nghìn con số mỗi ca — <span class="k">ai kịp hiểu?</span></div>
+      <div class="cap" id="c2"><span class="k">DxFactory</span> — nền tảng AI cho nhà máy</div>
+      <div class="cap" id="c3">Mở <span class="k">Trung tâm Báo cáo</span> trong vài giây</div>
+      <div class="cap" id="c4">Báo cáo hoạt động máy · <span class="k">14/06/2026</span></div>
+      <div class="cap" id="c5">Chỉ cần hỏi <span class="k">Trợ lý AI</span> bằng tiếng Việt</div>
+      <div class="cap" id="c6">AI đọc dữ liệu 3 nhà máy, <span class="k">phân tích tức thì</span></div>
+      <div class="cap" id="c7"><span class="k">83 sự cố</span> ngoài kế hoạch · K12 dừng &gt;700 giờ</div>
+      <div class="cap" id="c8">AI chỉ ra máy <span class="k">cần ưu tiên bảo trì</span></div>
+      <div class="cap" id="c9">Hàng giờ phân tích → <span class="k">chỉ còn vài giây</span></div>
+      <div class="cap" id="c10">Biến dữ liệu nhà máy <span class="k">thành quyết định</span></div>
+
+      <!-- outro -->
+      <div id="outro" class="scene">
+        <div class="outro-wrap">
+          <div class="wordmark">Dx<span class="x">Factory</span></div>
+          <div class="outro-tag">Biến dữ liệu nhà máy <span class="accent">thành quyết định</span></div>
+          <div class="outro-sub">Trải nghiệm demo · <b>demo.indus.nois.vn</b></div>
+        </div>
+      </div>
+
+      <script>
+        window.__timelines = window.__timelines || {};
+        var tl = gsap.timeline({ paused: true });
+        var fps = 30, q = function (t) { return Math.round(t * fps) / fps; };
+
+        // ---- virtual camera on footage ----
+        var vw = document.getElementById("video-wrap");
+        var cam = { s: 1, x: 0, y: 0 };
+        function applyCam() { vw.style.transform = "translate(" + cam.x + "px," + cam.y + "px) scale(" + cam.s + ")"; }
+        applyCam();
+
+        // ============ INTRO (0 - 12.5) ============
+        tl.set("#brand", { opacity: 0 });
+        tl.fromTo(".eyebrow", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.4);
+        tl.fromTo(".hook1", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }, 0.7);
+        tl.fromTo(".hook2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, 1.5);
+        // hook -> brand swap
+        tl.to("#hook", { opacity: 0, y: -30, duration: 0.6, ease: "power2.in" }, 7.3);
+        tl.to("#brand", { opacity: 1, duration: 0.5, ease: "power2.out" }, 7.9);
+        tl.fromTo(".wordmark", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.7, ease: "back.out(1.5)" }, 7.95);
+        tl.fromTo("#brule", { width: 0 }, { width: 320, duration: 0.6, ease: "power2.out" }, 8.4);
+        tl.fromTo(".tagline", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 8.7);
+        // intro out -> footage in (crossfade transition)
+        tl.to("#intro", { opacity: 0, duration: 0.6, ease: "power2.inOut" }, 12.0);
+        tl.to("#video-wrap", { opacity: 1, duration: 0.6, ease: "power2.inOut" }, 12.1);
+
+        // ============ FOOTAGE beats & camera ============
+        // NAV 12.5-19  (open VO) — chip1
+        tl.fromTo("#chip1", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 12.9);
+        tl.to("#chip1", { opacity: 0, duration: 0.35 }, 18.7);
+        // DASH 19-25.8 (report VO) — gentle push-in + chip2
+        tl.fromTo("#chip2", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 19.0);
+        tl.to(cam, { s: 1.07, x: 0, y: -18, duration: 2.4, ease: "power2.inOut", onUpdate: applyCam }, 19.2);
+        tl.to("#chip2", { opacity: 0, duration: 0.35 }, 26.4);
+        // ASK 25.8-30.8 (ask VO) — push toward chat panel (right) + chip3
+        tl.fromTo("#chip3", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 26.7);
+        tl.to(cam, { s: 1.16, x: -150, y: 10, duration: 1.6, ease: "power2.inOut", onUpdate: applyCam }, 26.9);
+        // PROC 30.8-35.3 (process VO) — hold on chat, subtle drift
+        tl.to(cam, { s: 1.2, x: -170, y: 0, duration: 3.0, ease: "sine.inOut", onUpdate: applyCam }, 32.2);
+        // hide chip before insights
+        tl.to("#chip3", { opacity: 0, duration: 0.4 }, 36.4);
+
+        // ============ INSIGHTS (dim footage, reveal stats) ============
+        tl.to("#veil", { opacity: 1, duration: 0.7, ease: "power2.out" }, 37.4);
+        tl.to(cam, { s: 1.24, x: -150, y: 0, duration: 12, ease: "sine.inOut", onUpdate: applyCam }, 38.0); // slow drift under cards
+        tl.fromTo("#ins-head", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" }, 37.9);
+        // ins1 (38.4): two big stats + count-up 83
+        tl.fromTo("#st1", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.4)" }, 38.4);
+        (function () { var o = { v: 0 }; tl.to(o, { v: 83, duration: 1.1, ease: "power2.out",
+          onUpdate: function () { document.getElementById("st1n").textContent = Math.round(o.v); } }, 38.6); })();
+        tl.fromTo("#st2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.4)" }, 39.1);
+        // ins2 (44.5): action cards + mttr
+        tl.fromTo("#act1", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 44.6);
+        tl.fromTo("#act2", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 45.4);
+        tl.fromTo("#mttr", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 46.2);
+
+        // ============ transition to OUTRO (51.8) ============
+        tl.to(["#insights", "#veil", "#video-wrap"], { opacity: 0, duration: 0.7, ease: "power2.inOut" }, 51.6);
+        tl.to("#outro", { opacity: 1, duration: 0.7, ease: "power2.inOut" }, 51.8);
+        tl.fromTo("#outro .wordmark", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.8, ease: "back.out(1.4)" }, 52.0);
+        tl.fromTo("#outro .outro-tag", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 52.5);
+        tl.fromTo("#outro .outro-sub", { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, 53.2);
+
+        // ============ CAPTIONS ============
+        var caps = [
+          ["#c1", 0.6, 7.3], ["#c2", 7.9, 12.0], ["#c3", 12.6, 18.9], ["#c4", 19.3, 26.5],
+          ["#c5", 26.9, 33.1], ["#c6", 33.5, 38.0], ["#c7", 38.4, 44.4], ["#c8", 44.7, 50.3],
+          ["#c9", 50.7, 54.5], ["#c10", 55.0, 61.4]
+        ];
+        caps.forEach(function (c) {
+          tl.fromTo(c[0], { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, c[1]);
+          tl.to(c[0], { opacity: 0, duration: 0.35, ease: "power2.in" }, c[2]);
+        });
+
+        window.__timelines["main"] = tl;
+      </script>
+    </div>
+  </body>
+</html>

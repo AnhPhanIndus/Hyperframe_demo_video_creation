@@ -1,0 +1,67 @@
+{
+  "voice": "vi-VN-HoaiMyNeural",
+  "rate": "+6%",
+  "total": 59.09,
+  "segments": [
+    {
+      "name": "vo01_hook",
+      "text": "Mỗi ngày, nhà máy của anh chị sinh ra hàng nghìn con số. Nhưng ai đủ thời gian để đọc, và để hiểu?",
+      "path": "assets/voice/vo01_hook.mp3",
+      "dur": 7.248
+    },
+    {
+      "name": "vo02_brand",
+      "text": "Đi-ếch phách-to-ri — nền tảng ây ai cho nhà máy sản xuất thông minh.",
+      "path": "assets/voice/vo02_brand.mp3",
+      "dur": 4.344
+    },
+    {
+      "name": "vo03_open",
+      "text": "Chỉ vài giây, mở Trung tâm Báo cáo. Toàn bộ dữ liệu vận hành, gom về một nơi.",
+      "path": "assets/voice/vo03_open.mp3",
+      "dur": 6.48
+    },
+    {
+      "name": "vo04_report",
+      "text": "Báo cáo hoạt động máy ngày mười bốn tháng Sáu: máy đang sửa chữa, thời gian sự cố, công việc bảo trì, rõ ràng tức thì.",
+      "path": "assets/voice/vo04_report.mp3",
+      "dur": 7.488
+    },
+    {
+      "name": "vo05_ask",
+      "text": "Không cần lập trình, cũng chẳng cần truy vấn. Chỉ cần hỏi Trợ lý ây ai, bằng tiếng Việt.",
+      "path": "assets/voice/vo05_ask.mp3",
+      "dur": 6.384
+    },
+    {
+      "name": "vo06_process",
+      "text": "Ngay lập tức, ây ai đọc dữ liệu ba nhà máy, và phân tích chuyên sâu.",
+      "path": "assets/voice/vo06_process.mp3",
+      "dur": 4.632
+    },
+    {
+      "name": "vo07_ins1",
+      "text": "Tám mươi ba sự cố ngoài kế hoạch. Máy K mười hai dừng lâu nhất, hơn bảy trăm giờ.",
+      "path": "assets/voice/vo07_ins1.mp3",
+      "dur": 6.096
+    },
+    {
+      "name": "vo08_ins2",
+      "text": "Ây ai chỉ ra đúng ba máy cần ưu tiên bảo trì, và những máy cần rà soát nguyên nhân gốc rễ.",
+      "path": "assets/voice/vo08_ins2.mp3",
+      "dur": 5.784
+    },
+    {
+      "name": "vo09_value",
+      "text": "Việc trước đây tốn hàng giờ phân tích, giờ chỉ còn vài giây.",
+      "path": "assets/voice/vo09_value.mp3",
+      "dur": 3.984
+    },
+    {
+      "name": "vo10_close",
+      "text": "Đi-ếch phách-to-ri. Biến dữ liệu nhà máy, thành quyết định. Ngay hôm nay.",
+      "path": "assets/voice/vo10_close.mp3",
+      "dur": 6.648
+    }
+  ]
+}
