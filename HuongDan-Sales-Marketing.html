@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hướng dẫn tạo Video Demo sản phẩm cho đội Sales &amp; Marketing</title>
+<style>
+  :root{
+    --bg:#05070d; --bg2:#080d18; --panel:#0c1424; --panel2:#0f1a30;
+    --ink:#eaf2ff; --muted:#9fb6df; --dim:#6d7f9e;
+    --cyan:#22d3ee; --cyan-deep:#06b6d4; --violet:#a78bfa; --violet-deep:#7c3aed;
+    --line:rgba(34,211,238,0.16); --line2:rgba(148,163,184,0.14);
+    --amber:#fbbf24; --red:#fb7185; --green:#34d399;
+    --code:#0a1020;
+    --grad:linear-gradient(100deg,var(--cyan),var(--violet));
+    --mono:ui-monospace,"Cascadia Code","Consolas","Courier New",monospace;
+    --sans:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+    --maxw:1000px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.68;font-size:17px;-webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(90% 55% at 15% -8%,rgba(34,211,238,0.10),transparent 60%),
+      radial-gradient(80% 55% at 98% 4%,rgba(124,58,237,0.12),transparent 55%);
+    background-attachment:fixed;}
+  a{color:var(--cyan);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+  .accent{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  b,strong{color:var(--ink);font-weight:700}
+
+  /* nav */
+  nav.top{position:sticky;top:0;z-index:60;backdrop-filter:blur(10px);
+    background:rgba(5,7,13,0.78);border-bottom:1px solid var(--line)}
+  nav.top .wrap{display:flex;align-items:center;gap:18px;height:58px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;white-space:nowrap}
+  .logo .m{width:30px;height:30px;border-radius:8px;background:var(--grad);
+    display:flex;align-items:center;justify-content:center;color:#04121a;font-weight:900;font-size:14px}
+  nav.top .links{margin-left:auto;display:flex;gap:6px;font-size:14px;font-weight:600;flex-wrap:wrap}
+  nav.top .links a{color:var(--muted);padding:6px 11px;border-radius:8px}
+  nav.top .links a:hover{color:var(--cyan);background:rgba(34,211,238,0.08);text-decoration:none}
+  @media(max-width:820px){nav.top .links{display:none}}
+
+  /* hero */
+  header.hero{padding:64px 0 26px;text-align:center}
+  .eyebrow{font-size:13px;font-weight:800;letter-spacing:0.28em;color:var(--cyan);text-transform:uppercase}
+  h1{font-size:clamp(32px,5.2vw,56px);line-height:1.1;margin:18px 0 16px;font-weight:800;letter-spacing:-0.02em}
+  .sub{font-size:clamp(17px,2.1vw,20px);color:var(--muted);max-width:720px;margin:0 auto}
+  .badges{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:26px}
+  .badge{font-size:13.5px;font-weight:600;padding:7px 15px;border-radius:999px;
+    background:var(--panel);border:1px solid var(--line);color:var(--ink)}
+  .badge b{color:var(--cyan)}
+  .timebar{display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:22px;
+    font-size:14px;color:var(--dim)}
+  .timebar span{background:rgba(148,163,184,0.08);border:1px solid var(--line2);border-radius:8px;padding:5px 12px}
+  .timebar b{color:var(--muted)}
+
+  section{padding:40px 0;border-top:1px solid var(--line2)}
+  h2{font-size:clamp(23px,3.3vw,32px);font-weight:800;letter-spacing:-0.01em;margin:0 0 8px;
+    display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+  h2 .n{width:38px;height:38px;flex:none;border-radius:10px;background:var(--grad);color:#04121a;
+    font-weight:900;font-size:18px;display:flex;align-items:center;justify-content:center}
+  h2.plain .n{background:rgba(34,211,238,0.14);color:var(--cyan);border:1px solid var(--line)}
+  .lead{color:var(--muted);margin:0 0 20px;font-size:17.5px;max-width:800px}
+  .part-label{font-size:13px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;
+    color:var(--violet);margin-bottom:2px}
+
+  /* concept flow */
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin:6px 0 4px}
+  .flow .step{flex:1 1 190px;min-width:170px;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:18px;position:relative}
+  .flow .step .ic{font-size:24px}
+  .flow .step .k{font-size:12px;font-weight:800;letter-spacing:0.1em;color:var(--cyan);text-transform:uppercase;margin-top:8px}
+  .flow .step .t{font-weight:700;margin-top:5px;font-size:15.5px;color:var(--ink)}
+  .flow .step .d{color:var(--dim);font-size:13.5px;margin-top:5px}
+  .flow .arr{align-self:center;color:var(--violet);font-size:22px;font-weight:800;flex:none}
+  @media(max-width:720px){.flow .arr{display:none}}
+
+  /* split you/ai */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px}
+  @media(max-width:720px){.split{grid-template-columns:1fr}}
+  .col{border-radius:16px;padding:22px 24px;border:1px solid var(--line)}
+  .col.you{background:linear-gradient(180deg,rgba(52,211,153,0.08),var(--bg2))}
+  .col.ai{background:linear-gradient(180deg,rgba(124,58,237,0.10),var(--bg2))}
+  .col h4{margin:0 0 12px;font-size:17px;display:flex;align-items:center;gap:9px}
+  .col.you h4{color:var(--green)} .col.ai h4{color:var(--violet)}
+  ul.tick{list-style:none;padding:0;margin:0}
+  ul.tick li{position:relative;padding-left:24px;margin:9px 0;color:var(--muted);font-size:15.5px}
+  ul.tick li::before{content:"";position:absolute;left:2px;top:9px;width:9px;height:9px;border-radius:2px;background:var(--grad)}
+  ul.tick li b{color:var(--ink)}
+
+  /* step cards */
+  .step-card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+    border-radius:16px;padding:22px 24px;margin:16px 0;position:relative}
+  .step-card .head{display:flex;align-items:flex-start;gap:15px;margin-bottom:6px}
+  .step-card .num{flex:none;width:34px;height:34px;border-radius:9px;background:rgba(34,211,238,0.12);
+    border:1px solid var(--line);color:var(--cyan);font-weight:900;font-size:16px;
+    display:flex;align-items:center;justify-content:center;margin-top:2px}
+  .step-card h3{margin:0;font-size:19.5px;font-weight:800;line-height:1.3}
+  .step-card .goal{color:var(--muted);margin:2px 0 0;font-size:15px}
+  .step-card .body{padding-left:49px}
+  @media(max-width:600px){.step-card .body{padding-left:0}}
+  .step-card p{margin:12px 0 0;color:var(--muted)}
+  .step-card p b{color:var(--ink)}
+
+  /* command box */
+  .cmd{position:relative;background:var(--code);border:1px solid var(--line2);border-radius:11px;
+    margin:13px 0 0;overflow:hidden}
+  .cmd .bar{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;
+    border-bottom:1px solid var(--line2);background:rgba(148,163,184,0.05)}
+  .cmd .bar .lbl{font-size:11.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--dim)}
+  .cmd .bar button{background:rgba(34,211,238,0.12);border:1px solid var(--line);color:var(--cyan);
+    font-size:12px;font-weight:700;padding:4px 11px;border-radius:7px;cursor:pointer;font-family:var(--sans)}
+  .cmd .bar button:hover{background:rgba(34,211,238,0.2)}
+  .cmd pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--mono);
+    font-size:13.5px;line-height:1.6;color:#cfe0f8;white-space:pre}
+  .cmd .c{color:#5d7290}
+  code.inl{font-family:var(--mono);font-size:0.9em;background:rgba(148,163,184,0.14);
+    padding:2px 7px;border-radius:6px;color:#dbe7ff;word-break:break-word}
+
+  /* "say to AI" chat bubble */
+  .say{margin:14px 0 0;border-radius:13px;overflow:hidden;border:1px solid rgba(124,58,237,0.35);
+    background:linear-gradient(180deg,rgba(124,58,237,0.10),rgba(12,20,36,0.6))}
+  .say .bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 13px;
+    background:rgba(124,58,237,0.14);border-bottom:1px solid rgba(124,58,237,0.28)}
+  .say .bar .who{font-size:12.5px;font-weight:800;color:var(--violet);display:flex;align-items:center;gap:7px}
+  .say .bar button{background:rgba(167,139,250,0.16);border:1px solid rgba(124,58,237,0.4);color:#d4c6ff;
+    font-size:12px;font-weight:700;padding:4px 11px;border-radius:7px;cursor:pointer;font-family:var(--sans)}
+  .say .bar button:hover{background:rgba(167,139,250,0.28)}
+  .say .msg{padding:14px 16px;color:#e9e2ff;font-size:15.5px;white-space:pre-wrap}
+
+  /* notes */
+  .note{border-radius:12px;padding:14px 18px;margin:14px 0 0;border:1px solid;font-size:15px}
+  .note .h{font-weight:800;margin-bottom:3px;display:flex;align-items:center;gap:8px}
+  .note.tip{background:rgba(52,211,153,0.06);border-color:rgba(52,211,153,0.28)}
+  .note.tip .h{color:var(--green)}
+  .note.warn{background:rgba(251,191,36,0.07);border-color:rgba(251,191,36,0.32)}
+  .note.warn .h{color:var(--amber)}
+  .note.info{background:rgba(34,211,238,0.06);border-color:var(--line)}
+  .note.info .h{color:var(--cyan)}
+
+  /* download link cards */
+  .dl{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:9px 15px;margin:10px 8px 0 0;font-weight:600;font-size:14.5px;color:var(--ink)}
+  .dl:hover{border-color:var(--cyan);text-decoration:none}
+  .dl .ic{font-size:16px}
+
+  /* do / dont */
+  .dd{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px}
+  @media(max-width:720px){.dd{grid-template-columns:1fr}}
+  .ddcol{border-radius:14px;padding:20px 22px;border:1px solid var(--line2)}
+  .ddcol.good{background:rgba(52,211,153,0.05);border-color:rgba(52,211,153,0.25)}
+  .ddcol.bad{background:rgba(251,113,133,0.05);border-color:rgba(251,113,133,0.25)}
+  .ddcol h4{margin:0 0 10px;font-size:16px;display:flex;align-items:center;gap:8px}
+  .ddcol.good h4{color:var(--green)} .ddcol.bad h4{color:var(--red)}
+  .ddcol ul{margin:0;padding-left:20px} .ddcol li{margin:7px 0;color:var(--muted);font-size:15px}
+
+  /* brief template */
+  .tmpl{background:var(--code);border:1px solid var(--line2);border-radius:12px;padding:16px 18px;
+    font-family:var(--mono);font-size:13.5px;line-height:1.75;color:#cfe0f8;overflow-x:auto;white-space:pre;margin-top:6px}
+  .tmpl .k{color:var(--cyan);font-weight:700} .tmpl .h{color:#5d7290}
+
+  /* trouble table */
+  .tbl{width:100%;border-collapse:collapse;margin-top:8px;font-size:15px;overflow:hidden;border-radius:12px}
+  .tblwrap{overflow-x:auto;border:1px solid var(--line2);border-radius:12px;margin-top:8px}
+  .tbl th,.tbl td{text-align:left;padding:13px 15px;border-bottom:1px solid var(--line2);vertical-align:top}
+  .tbl th{background:rgba(34,211,238,0.07);color:var(--cyan);font-size:13px;font-weight:800;
+    letter-spacing:0.04em;text-transform:uppercase}
+  .tbl td{color:var(--muted)} .tbl td b{color:var(--ink)}
+  .tbl tr:last-child td{border-bottom:none}
+
+  /* video showcase */
+  .frame{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);
+    box-shadow:0 26px 80px rgba(0,0,0,0.5);background:#000;margin-top:8px}
+  .frame video{display:block;width:100%;height:auto}
+  .cap{margin-top:12px;color:var(--dim);font-size:14px}
+  .cap b{color:var(--muted)}
+
+  /* checklist */
+  .check{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 6px;margin-top:6px}
+  .check label{display:flex;gap:12px;align-items:flex-start;padding:10px 16px;border-radius:10px;cursor:pointer}
+  .check label:hover{background:rgba(34,211,238,0.05)}
+  .check input{margin-top:5px;width:17px;height:17px;accent-color:var(--cyan);flex:none;cursor:pointer}
+  .check .t{color:var(--ink);font-weight:600}
+  .check .s{color:var(--dim);font-size:14px;display:block}
+
+  footer{padding:38px 0 60px;border-top:1px solid var(--line2);color:var(--dim);font-size:14px;text-align:center}
+  .pill{display:inline-block;background:var(--panel);border:1px solid var(--line);border-radius:999px;
+    padding:6px 16px;font-size:13px;color:var(--muted);margin-top:10px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--panel2);border:1px solid var(--cyan);color:var(--ink);padding:10px 18px;border-radius:10px;
+    font-size:14px;font-weight:600;opacity:0;transition:all .25s;pointer-events:none;z-index:99}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<nav class="top"><div class="wrap">
+  <div class="logo"><span class="m">Dx</span><span>Video Demo <span class="accent">bằng AI</span></span></div>
+  <div class="links">
+    <a href="#how">Cách hoạt động</a>
+    <a href="#setup">Cài đặt</a>
+    <a href="#make">Tạo video</a>
+    <a href="#tips">Mẹo viết brief</a>
+    <a href="#trouble">Trục trặc</a>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Dành cho đội Sales &amp; Marketing</div>
+  <h1>Tạo video demo sản phẩm<br/>chỉ bằng cách <span class="accent">trò chuyện với AI</span></h1>
+  <p class="sub">Bạn mô tả ý tưởng bằng tiếng Việt. Trợ lý AI sẽ tự động quay lại phần mềm thật đang chạy,
+  lồng giọng đọc, ghép nhạc nền và xuất ra một video demo 60 giây bóng bẩy. <b>Bạn không cần biết lập trình.</b></p>
+  <div class="badges">
+    <span class="badge"><b>✦</b> Không cần code</span>
+    <span class="badge"><b>✦</b> Quay app thật</span>
+    <span class="badge"><b>✦</b> Giọng đọc tiếng Việt</span>
+    <span class="badge"><b>✦</b> Xuất video Full HD</span>
+  </div>
+  <div class="timebar">
+    <span>⚙️ Cài đặt lần đầu: <b>~30 phút</b> (chỉ làm 1 lần)</span>
+    <span>🎬 Mỗi video sau đó: <b>~30–60 phút</b>, phần lớn là ngồi chờ</span>
+  </div>
+</div></header>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section id="how"><div class="wrap">
+  <h2 class="plain"><span class="n">?</span>Cách này hoạt động thế nào?</h2>
+  <p class="lead">Hãy hình dung bạn có một <b>trợ lý dựng phim biết lập trình</b> ngồi trong máy tính. Bạn giao "đề bài"
+  (muốn demo tính năng gì, nói gì, nhấn mạnh số liệu nào), còn mọi việc kỹ thuật — mở app, quay màn hình, cắt ghép,
+  lồng tiếng, xuất video — <b>trợ lý AI làm hết</b>. Công cụ đó tên là <b>Claude Code</b>, chạy ngay trong VS Code.</p>
+
+  <div class="flow">
+    <div class="step"><div class="ic">✍️</div><div class="k">Bước 1 · Bạn</div><div class="t">Mô tả ý tưởng</div><div class="d">Viết vài dòng: demo tính năng nào, thoại ra sao, số liệu nào quan trọng.</div></div>
+    <div class="arr">→</div>
+    <div class="step"><div class="ic">🎥</div><div class="k">Bước 2 · AI</div><div class="t">Quay app thật</div><div class="d">AI tự mở phần mềm, đăng nhập, thao tác và quay lại toàn bộ màn hình.</div></div>
+    <div class="arr">→</div>
+    <div class="step"><div class="ic">🎙️</div><div class="k">Bước 3 · AI</div><div class="t">Lồng tiếng + nhạc</div><div class="d">Tạo giọng đọc tiếng Việt, ghép nhạc nền, thêm hiệu ứng zoom &amp; số liệu.</div></div>
+    <div class="arr">→</div>
+    <div class="step"><div class="ic">✅</div><div class="k">Bước 4 · Bạn</div><div class="t">Nhận video</div><div class="d">Xem thử, góp ý bằng lời, AI chỉnh lại. Xong là có file MP4 để gửi đi.</div></div>
+  </div>
+
+  <div class="split" style="margin-top:20px">
+    <div class="col you">
+      <h4>🙋 Việc của BẠN</h4>
+      <ul class="tick">
+        <li><b>Nghĩ ý tưởng</b> — demo tính năng gì, cho ai xem, thông điệp chính.</li>
+        <li><b>Viết brief</b> — vài dòng mô tả kịch bản (có mẫu sẵn ở dưới).</li>
+        <li><b>Cung cấp tài khoản</b> đăng nhập vào phần mềm demo.</li>
+        <li><b>Xem &amp; góp ý</b> — "chỗ này zoom to hơn", "đổi câu mở đầu"... nói bằng tiếng Việt bình thường.</li>
+      </ul>
+    </div>
+    <div class="col ai">
+      <h4>🤖 Việc của AI</h4>
+      <ul class="tick">
+        <li><b>Mở &amp; điều khiển phần mềm</b>, quay lại thao tác thật.</li>
+        <li><b>Cắt, tua nhanh</b> các đoạn chờ, ghép thành footage mượt.</li>
+        <li><b>Tạo giọng đọc</b> tiếng Việt &amp; trộn nhạc nền.</li>
+        <li><b>Dựng hiệu ứng</b> (camera zoom, số liệu nổi bật) và <b>xuất video MP4</b>.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note info"><div class="h">ℹ️ Nói ngắn gọn</div>
+  Bạn là <b>đạo diễn</b> ra kịch bản và duyệt bản dựng. AI là <b>ê-kíp kỹ thuật</b> làm tất cả phần còn lại.
+  Toàn bộ trao đổi bằng <b>tiếng Việt</b>, gõ vào khung chat như nhắn tin.</div>
+</div></section>
+
+<!-- ============ PART 1: SETUP ============ -->
+<section id="setup"><div class="wrap">
+  <div class="part-label">Phần 1</div>
+  <h2><span class="n">A</span>Cài đặt môi trường (chỉ làm 1 lần)</h2>
+  <p class="lead">Đây là phần "cài công cụ" trên máy tính — hơi kỹ thuật một chút nhưng chỉ làm <b>đúng một lần</b>.
+  Nếu ngại, bạn có thể nhờ bạn IT làm hộ khúc này. Đa số thời gian là ngồi chờ tải về. Máy dùng <b>Windows 10/11</b>.</p>
+
+  <div class="note tip"><div class="h">💡 Bí quyết đỡ vất vả</div>
+  Sau khi cài xong <b>Claude Code</b> (Bước 2), bạn có thể nhờ chính AI kiểm tra và cài nốt phần còn thiếu — chỉ cần gõ:
+  <i>"Kiểm tra giúp mình máy đã có đủ Node, Python, ffmpeg chưa, thiếu cái nào thì hướng dẫn mình cài."</i></div>
+
+  <!-- Step 1 -->
+  <div class="step-card">
+    <div class="head">
+      <div class="num">1</div>
+      <div><h3>Cài Visual Studio Code (VS Code)</h3>
+      <p class="goal">Đây là "phòng làm việc" — nơi bạn sẽ trò chuyện với AI.</p></div>
+    </div>
+    <div class="body">
+      <p>Tải bản cho Windows, mở file <code class="inl">.exe</code>, bấm <b>Next → Next → Install → Finish</b>. Xong.</p>
+      <a class="dl" href="https://code.visualstudio.com/download" target="_blank"><span class="ic">⬇️</span> Tải VS Code</a>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-card">
+    <div class="head">
+      <div class="num">2</div>
+      <div><h3>Cài trợ lý AI "Claude Code" &amp; đăng nhập</h3>
+      <p class="goal">Đây chính là trợ lý sẽ dựng video cho bạn.</p></div>
+    </div>
+    <div class="body">
+      <p><b>a.</b> Mở VS Code. Nhìn thanh dọc bên trái, bấm biểu tượng <b>Extensions</b> (bốn ô vuông xếp hình, hoặc nhấn <code class="inl">Ctrl</code>+<code class="inl">Shift</code>+<code class="inl">X</code>).</p>
+      <p><b>b.</b> Gõ <b>"Claude Code"</b> vào ô tìm kiếm → chọn tiện ích của <b>Anthropic</b> → bấm <b>Install</b>.</p>
+      <p><b>c.</b> Sau khi cài, bên trái xuất hiện biểu tượng Claude. Bấm vào, chọn <b>Sign in</b> và đăng nhập bằng tài khoản Claude của công ty (trình duyệt sẽ mở ra để xác nhận).</p>
+      <div class="note info"><div class="h">ℹ️ Chưa có tài khoản Claude?</div>Hỏi quản lý/IT để được cấp quyền truy cập <b>Claude</b> của công ty trước khi làm bước này.</div>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step-card">
+    <div class="head">
+      <div class="num">3</div>
+      <div><h3>Cài các công cụ nền: Node, Python, ffmpeg, Git</h3>
+      <p class="goal">Bốn công cụ để AI quay phim, lồng tiếng và cắt ghép. Cài một lượt bằng cách dán lệnh.</p></div>
+    </div>
+    <div class="body">
+      <p><b>a.</b> Trong VS Code, mở <b>Terminal</b>: menu trên cùng <b>Terminal → New Terminal</b> (hoặc nhấn <code class="inl">Ctrl</code>+<code class="inl">`</code>). Một khung dòng lệnh hiện ra ở dưới.</p>
+      <p><b>b.</b> Bấm nút <b>Sao chép</b> ở khối bên dưới, dán vào Terminal (chuột phải → Paste), nhấn <b>Enter</b>, rồi ngồi chờ nó tải &amp; cài từng cái:</p>
+      <div class="cmd">
+        <div class="bar"><span class="lbl">Dán vào Terminal — cài 4 công cụ</span><button data-copy>Sao chép</button></div>
+<pre><span class="c"># Cài Node.js, Python, ffmpeg, Git bằng winget (có sẵn trên Windows)</span>
+winget install OpenJS.NodeJS.LTS
+winget install Python.Python.3.12
+winget install Gyan.FFmpeg
+winget install Git.Git</pre>
+      </div>
+      <div class="note warn"><div class="h">▲ Lưu ý nhỏ</div>
+      Nếu nó hỏi đồng ý điều khoản, gõ <b>Y</b> rồi Enter. Cài xong <b>4 công cụ</b>, hãy <b>đóng Terminal và mở lại</b> (hoặc khởi động lại VS Code) để máy nhận công cụ mới.</div>
+      <p style="margin-top:14px">Nếu máy báo <i>"winget không tồn tại"</i>, tải tay từng cái ở đây (bản Windows, cài mặc định Next→Finish):</p>
+      <a class="dl" href="https://nodejs.org/en/download" target="_blank"><span class="ic">⬇️</span> Node.js (bản LTS)</a>
+      <a class="dl" href="https://www.python.org/downloads/" target="_blank"><span class="ic">⬇️</span> Python</a>
+      <a class="dl" href="https://www.gyan.dev/ffmpeg/builds/" target="_blank"><span class="ic">⬇️</span> ffmpeg</a>
+      <a class="dl" href="https://git-scm.com/download/win" target="_blank"><span class="ic">⬇️</span> Git</a>
+      <div class="note tip" style="margin-top:14px"><div class="h">💡 Với Python</div>Nếu cài tay, ở màn hình đầu tiên nhớ tích ô <b>"Add Python to PATH"</b> rồi mới bấm Install.</div>
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step-card">
+    <div class="head">
+      <div class="num">4</div>
+      <div><h3>Tải dự án (repo) về máy</h3>
+      <p class="goal">Lấy toàn bộ bộ khung dựng video về máy bạn.</p></div>
+    </div>
+    <div class="body">
+      <p>Trong Terminal của VS Code, dán lệnh sau để tải dự án về ổ <code class="inl">C:\</code>:</p>
+      <div class="cmd">
+        <div class="bar"><span class="lbl">Dán vào Terminal — tải dự án</span><button data-copy>Sao chép</button></div>
+<pre>cd C:\
+git clone https://github.com/AnhPhanIndus/Hyperframe_demo_video_creation.git HyperFrames</pre>
+      </div>
+      <p>Lần đầu tải, trình duyệt có thể bật lên bảo bạn <b>đăng nhập GitHub</b> — đăng nhập bằng tài khoản công ty cấp. Chờ tải xong (dự án khá nặng, vài phút).</p>
+      <p>Sau đó mở dự án: menu <b>File → Open Folder →</b> chọn thư mục <code class="inl">C:\HyperFrames</code> → <b>Open</b>. Nếu nó hỏi "Do you trust the authors?", chọn <b>Yes, I trust</b>.</p>
+    </div>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="step-card">
+    <div class="head">
+      <div class="num">5</div>
+      <div><h3>Cho AI "con mắt &amp; đôi tay": bật Playwright MCP</h3>
+      <p class="goal">Playwright MCP là thứ giúp AI mở được trình duyệt và điều khiển phần mềm thật để quay footage.</p></div>
+    </div>
+    <div class="body">
+      <p>Dán 3 lệnh sau vào Terminal, nhấn Enter sau mỗi dòng:</p>
+      <div class="cmd">
+        <div class="bar"><span class="lbl">Dán vào Terminal — trang bị cho AI</span><button data-copy>Sao chép</button></div>
+<pre><span class="c"># 1) Cho Claude Code khả năng điều khiển trình duyệt</span>
+claude mcp add playwright npx @playwright/mcp@latest
+
+<span class="c"># 2) Tải trình duyệt cho việc quay phim</span>
+npx playwright install chromium
+
+<span class="c"># 3) Cài bộ tạo giọng đọc tiếng Việt (miễn phí, không cần API key)</span>
+pip install edge-tts</pre>
+      </div>
+      <div class="note tip"><div class="h">💡 Kiểm tra AI đã "nghe lời" chưa</div>
+      Mở khung chat Claude, gõ <code class="inl">/mcp</code> rồi Enter. Nếu thấy dòng <b>playwright · connected</b> là ngon.
+      Lần đầu ra lệnh quay phim, nhớ nhắc AI cụm chữ <b>"dùng Playwright MCP"</b> để nó chắc chắn dùng đúng công cụ.</div>
+    </div>
+  </div>
+
+  <!-- Step 6 -->
+  <div class="step-card">
+    <div class="head">
+      <div class="num">6</div>
+      <div><h3>Chốt lại: hỏi AI xem đã sẵn sàng chưa</h3>
+      <p class="goal">Thay vì tự kiểm tra từng cái, để AI tự soát giúp.</p></div>
+    </div>
+    <div class="body">
+      <p>Mở khung chat Claude trong dự án <code class="inl">C:\HyperFrames</code> và gửi tin nhắn này:</p>
+      <div class="say">
+        <div class="bar"><span class="who">💬 Gõ cho AI</span><button data-copy>Sao chép</button></div>
+        <div class="msg">Kiểm tra giúp mình môi trường đã sẵn sàng để dựng video demo chưa: Node, Python, ffmpeg, edge-tts và Playwright MCP. Cái nào thiếu thì chỉ mình cách cài.</div>
+      </div>
+      <p>AI sẽ tự chạy kiểm tra và báo lại. Nếu thiếu gì, cứ làm theo hướng dẫn của nó. Xong bước này là <b>máy đã sẵn sàng mãi mãi</b> — các lần sau vào thẳng Phần 2.</p>
+    </div>
+  </div>
+
+  <div class="note info"><div class="h">🎯 Checklist "đã cài xong"</div>
+  Tự tích khi hoàn tất từng mục:</div>
+  <div class="check">
+    <label><input type="checkbox"><span><span class="t">VS Code đã cài &amp; mở được</span></span></label>
+    <label><input type="checkbox"><span><span class="t">Claude Code đã cài &amp; đăng nhập</span><span class="s">Thấy biểu tượng Claude bên trái, đã Sign in</span></span></label>
+    <label><input type="checkbox"><span><span class="t">Node, Python, ffmpeg, Git đã cài</span></span></label>
+    <label><input type="checkbox"><span><span class="t">Đã tải dự án về C:\HyperFrames &amp; mở trong VS Code</span></span></label>
+    <label><input type="checkbox"><span><span class="t">Playwright MCP + edge-tts đã cài (gõ /mcp thấy playwright connected)</span></span></label>
+  </div>
+</div></section>
+
+<!-- ============ PART 2: MAKE A VIDEO ============ -->
+<section id="make"><div class="wrap">
+  <div class="part-label">Phần 2</div>
+  <h2><span class="n">B</span>Tạo video demo đầu tiên của bạn</h2>
+  <p class="lead">Đây là phần vui nhất — và cũng là phần bạn làm thường xuyên. Nguyên tắc: <b>bạn viết một bản "brief" (đề bài),
+  gửi cho AI, rồi ngồi xem &amp; góp ý.</b> Dưới đây là mẫu brief thật, đã tạo ra video demo DxFactory sáng nay.</p>
+
+  <!-- Step A -->
+  <div class="step-card">
+    <div class="head">
+      <div class="num">1</div>
+      <div><h3>Viết bản brief (đề bài) cho video</h3>
+      <p class="goal">Càng rõ ràng, AI càng làm đúng ý. Copy mẫu này rồi điền phần in màu.</p></div>
+    </div>
+    <div class="body">
+      <p>Tạo một file ghi chú (hoặc gõ thẳng cho AI). Cấu trúc gợi ý:</p>
+      <div class="cmd">
+        <div class="bar"><span class="lbl">Mẫu brief — điền các ô [ ... ]</span><button data-copy>Sao chép</button></div>
+<pre>Mình muốn làm một video demo sản phẩm dài <span class="c">[60 giây]</span>.
+
+SẢN PHẨM: <span class="c">[Tên phần mềm, ví dụ: DxFactory — nền tảng AI cho nhà máy]</span>
+KHÁN GIẢ: <span class="c">[Ai xem? ví dụ: giám đốc nhà máy, xem trên TV 16:9]</span>
+THÔNG ĐIỆP CHÍNH: <span class="c">[1 câu, ví dụ: biến dữ liệu nhà máy thành quyết định trong vài giây]</span>
+
+KỊCH BẢN THAO TÁC (AI sẽ quay lại đúng luồng này trên app thật):
+1. <span class="c">[Đăng nhập vào ... , chọn tổ chức ... ]</span>
+2. <span class="c">[Vào màn hình ... , bấm ... ]</span>
+3. <span class="c">[Hỏi Trợ lý AI: "..." và chờ nó trả lời]</span>
+
+TÀI KHOẢN DEMO: <span class="c">[đường link + user + mật khẩu]</span>
+
+SỐ LIỆU CẦN LÀM NỔI BẬT: <span class="c">[ví dụ: 83 sự cố, máy K12 dừng 700+ giờ]</span>
+
+GIỌNG ĐỌC: <span class="c">[nữ, vui tươi, tiếng Việt. Keyword tiếng Anh phiên âm:
+        AI = "ây ai", DxFactory = "đi-ếch phách-to-ri"]</span>
+NHẠC NỀN: <span class="c">[nhẹ nhàng, vui tươi]</span>
+GHI CHÚ: <span class="c">[đoạn AI xử lý lâu thì tua nhanh; nhấn nhá zoom vào số liệu quan trọng]</span></pre>
+      </div>
+      <div class="note tip"><div class="h">💡 Có sẵn ví dụ mẫu</div>
+      Xem file thật <code class="inl">Projects\DxF_Trung tâm báo cáo_demo\clip_idea.txt</code> trong dự án để tham khảo một brief hoàn chỉnh.</div>
+    </div>
+  </div>
+
+  <!-- Step B -->
+  <div class="step-card">
+    <div class="head">
+      <div class="num">2</div>
+      <div><h3>Giao đề bài cho AI</h3>
+      <p class="goal">Mở khung chat Claude &amp; gửi brief kèm câu lệnh khởi động.</p></div>
+    </div>
+    <div class="body">
+      <p>Trong VS Code (đang mở dự án <code class="inl">C:\HyperFrames</code>), mở khung chat Claude, dán toàn bộ brief ở trên, rồi thêm câu này ở cuối:</p>
+      <div class="say">
+        <div class="bar"><span class="who">💬 Gõ cho AI</span><button data-copy>Sao chép</button></div>
+        <div class="msg">Dùng Playwright MCP để mở app thật và quay footage theo kịch bản trên, rồi dựng thành video demo 60 giây hoàn chỉnh (giọng đọc + nhạc + hiệu ứng), giống cách đã làm trong Projects\DxF_Trung tâm báo cáo_demo. Tạo cho mình một thư mục project mới trong Projects\ và làm từng bước, có gì chưa rõ thì hỏi mình.</div>
+      </div>
+      <div class="note info"><div class="h">ℹ️ Vì sao nhắc "giống DxF_Trung tâm báo cáo_demo"?</div>
+      Vì đó là video mẫu đã hoàn chỉnh trong dự án. AI sẽ nhìn theo đó để biết quy trình, phong cách và chất lượng cần đạt.</div>
+    </div>
+  </div>
+
+  <!-- Step C -->
+  <div class="step-card">
+    <div class="head">
+      <div class="num">3</div>
+      <div><h3>AI làm việc — bạn ngồi xem</h3>
+      <p class="goal">AI sẽ đi qua 6 chặng. Bạn chỉ cần chờ &amp; trả lời khi nó hỏi.</p></div>
+    </div>
+    <div class="body">
+      <p>Đây là những gì AI làm (nó sẽ báo từng bước cho bạn theo dõi):</p>
+      <ul class="tick">
+        <li><b>Mở &amp; dò app</b> — đăng nhập, tìm đúng các nút theo kịch bản. AI có thể hỏi lại bạn về tài khoản hoặc đường đi.</li>
+        <li><b>Quay footage</b> — mở phần mềm thật ở chất lượng Full HD, thao tác &amp; quay màn hình.</li>
+        <li><b>Cắt &amp; tua nhanh</b> — những đoạn chờ AI của phần mềm xử lý (có thể lâu 2–3 phút) sẽ được tua nhanh lại.</li>
+        <li><b>Tạo giọng đọc</b> — đọc kịch bản tiếng Việt bằng giọng nữ.</li>
+        <li><b>Trộn nhạc nền</b> — ghép giọng đọc với nhạc, cân âm lượng.</li>
+        <li><b>Dựng &amp; xuất video</b> — thêm camera zoom, số liệu nổi bật, rồi render ra file MP4.</li>
+      </ul>
+      <div class="note warn"><div class="h">▲ Kiên nhẫn ở 2 chỗ</div>
+      <b>(1)</b> Lúc phần mềm chạy AI để trả lời có thể mất vài phút — bình thường, AI sẽ tua nhanh sau.
+      <b>(2)</b> Bước xuất video (render) cũng mất vài phút. Cứ để máy chạy, đừng tắt.</div>
+    </div>
+  </div>
+
+  <!-- Step D -->
+  <div class="step-card">
+    <div class="head">
+      <div class="num">4</div>
+      <div><h3>Xem thử &amp; góp ý (chỉnh tới khi ưng)</h3>
+      <p class="goal">Không ưng chỗ nào, cứ nói bằng tiếng Việt bình thường. AI chỉnh lại.</p></div>
+    </div>
+    <div class="body">
+      <p>Nhờ AI cho xem trước vài khung hình hoặc bản nháp:</p>
+      <div class="say">
+        <div class="bar"><span class="who">💬 Gõ cho AI</span><button data-copy>Sao chép</button></div>
+        <div class="msg">Cho mình xem thử vài ảnh chụp các cảnh chính (snapshot) trước khi xuất bản cuối nhé.</div>
+      </div>
+      <p style="margin-top:16px">Rồi góp ý tự nhiên, ví dụ:</p>
+      <ul class="tick">
+        <li>"Câu mở đầu nghe hơi khô, đổi thành lời cuốn hút hơn."</li>
+        <li>"Đoạn kết quả AI, <b>zoom to hơn</b> vào con số 83 sự cố."</li>
+        <li>"Nhạc nền hơi to, <b>giảm bớt</b> để nghe rõ giọng đọc."</li>
+        <li>"Thêm logo công ty ở góc phải trên suốt video."</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Step E -->
+  <div class="step-card">
+    <div class="head">
+      <div class="num">5</div>
+      <div><h3>Nhận thành phẩm</h3>
+      <p class="goal">File video nằm sẵn trong dự án, mở lên là dùng được.</p></div>
+    </div>
+    <div class="body">
+      <p>Video hoàn chỉnh là một file <code class="inl">.mp4</code> nằm trong thư mục <code class="inl">renders</code> của project, ví dụ:
+      <code class="inl">Projects\[tên project của bạn]\renders\video_60s.mp4</code>.</p>
+      <p>Bấm phải vào file trong VS Code → <b>Reveal in File Explorer</b> để mở thư mục, rồi copy/gửi file đi như bình thường (Zalo, email, đưa lên máy chiếu...).</p>
+      <div class="note tip"><div class="h">💡 Muốn sửa lại sau này?</div>
+      Chỉ cần mở lại dự án, nói với AI "sửa video trong project [tên] — đổi [...]". Không cần làm lại từ đầu.</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ EXAMPLE ============ -->
+<section id="example"><div class="wrap">
+  <h2 class="plain"><span class="n">▶</span>Xem một ví dụ có thật</h2>
+  <p class="lead">Video 60 giây dưới đây được tạo <b>100% bằng đúng quy trình trong trang này</b> — demo tính năng
+  Trung tâm Báo cáo &amp; Trợ lý AI của DxFactory. Đây chính là kết quả bạn có thể đạt được.</p>
+  <div class="frame">
+    <video controls preload="none"
+      poster="Projects/DxF_Trung%20t%C3%A2m%20b%C3%A1o%20c%C3%A1o_demo/snapshots/frame-05-at-47.0s.png"
+      src="Projects/DxF_Trung%20t%C3%A2m%20b%C3%A1o%20c%C3%A1o_demo/renders/dxf_demo_60s.mp4">
+      Trình duyệt không mở được video. Bạn có thể mở trực tiếp file trong thư mục
+      <code>Projects\DxF_Trung tâm báo cáo_demo\renders\dxf_demo_60s.mp4</code>.
+    </video>
+  </div>
+  <div class="cap">▶ <b>DxFactory · Demo 60 giây</b> — footage app thật + giọng đọc tiếng Việt + nhạc nền + hiệu ứng số liệu.
+  Nếu video không hiện, hãy mở trang hướng dẫn này từ trong thư mục dự án <code>C:\HyperFrames</code>.</div>
+
+  <div class="note info" style="margin-top:20px"><div class="h">📚 Muốn hiểu sâu hơn phần kỹ thuật?</div>
+  Có 2 tài liệu chuyên sâu (dành cho ai tò mò hoặc bạn IT):
+  <a href="HuongDan-HyperFrames.html">HuongDan-HyperFrames.html</a> ·
+  <a href="Projects/DxF_Trung%20t%C3%A2m%20b%C3%A1o%20c%C3%A1o_demo/workflow-guide.html">workflow-guide.html</a>.
+  Bạn <b>không bắt buộc</b> phải đọc chúng để tạo video.</div>
+</div></section>
+
+<!-- ============ TIPS ============ -->
+<section id="tips"><div class="wrap">
+  <h2 class="plain"><span class="n">✦</span>Mẹo viết brief cho video "ăn tiền"</h2>
+  <p class="lead">Chất lượng video phụ thuộc rất nhiều vào brief. Vài nguyên tắc đơn giản:</p>
+  <div class="dd">
+    <div class="ddcol good">
+      <h4>✅ Nên làm</h4>
+      <ul>
+        <li>Nêu rõ <b>3–5 con số quan trọng</b> muốn khoe (AI sẽ làm nổi bật chúng).</li>
+        <li>Giữ độ dài <b>~60 giây</b> — vừa đủ hấp dẫn, không lê thê.</li>
+        <li><b>Phiên âm</b> từ tiếng Anh: AI → "ây ai", DxFactory → "đi-ếch phách-to-ri".</li>
+        <li>Mô tả <b>tông giọng</b> mong muốn: nữ, vui tươi, truyền cảm, có nhấn nhá.</li>
+        <li>Ghi rõ <b>luồng thao tác</b> theo thứ tự, kèm tài khoản demo.</li>
+        <li>Chỉ ra chỗ cần <b>zoom nhấn mạnh</b> (số liệu, câu trả lời của AI).</li>
+      </ul>
+    </div>
+    <div class="ddcol bad">
+      <h4>⛔ Nên tránh</h4>
+      <ul>
+        <li>Brief mơ hồ kiểu "làm cho hay vào" — AI sẽ phải đoán.</li>
+        <li>Nhồi quá nhiều tính năng vào 60 giây → rối, không đọng lại gì.</li>
+        <li>Quên cung cấp <b>tài khoản đăng nhập</b> → AI không quay được app.</li>
+        <li>Để nguyên keyword tiếng Anh → giọng đọc phát âm sai, nghe kỳ.</li>
+        <li>Dùng dữ liệu thật/nhạy cảm của khách hàng lên demo công khai.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ TROUBLE ============ -->
+<section id="trouble"><div class="wrap">
+  <h2 class="plain"><span class="n">!</span>Gặp trục trặc? Cứ hỏi thẳng AI</h2>
+  <p class="lead">Nguyên tắc vàng: <b>bạn không cần tự sửa lỗi kỹ thuật</b>. Cứ mô tả vấn đề bằng tiếng Việt,
+  AI sẽ tự chẩn đoán &amp; xử lý. Vài tình huống hay gặp:</p>
+  <div class="tblwrap">
+    <table class="tbl">
+      <tr><th>Tình huống</th><th>Cứ nói với AI</th></tr>
+      <tr>
+        <td><b>AI không quay được app</b><br/><span style="color:var(--dim);font-size:13.5px">báo lỗi mở trình duyệt / không tìm thấy nút</span></td>
+        <td>"Bước quay footage bị lỗi. Bạn dùng Playwright MCP mở app kiểm tra lại đường đi &amp; các nút giúp mình, rồi thử quay lại."</td>
+      </tr>
+      <tr>
+        <td><b>Đăng nhập app thất bại</b></td>
+        <td>"Đăng nhập demo không vào được. Đây là link + tài khoản: [...]. Kiểm tra và đăng nhập lại giúp mình."</td>
+      </tr>
+      <tr>
+        <td><b>Giọng đọc bị lỗi / thiếu câu</b></td>
+        <td>"Phần giọng đọc bị thiếu/nghe lỗi. Tạo lại giúp mình, thử lại vài lần nếu bị rớt mạng."</td>
+      </tr>
+      <tr>
+        <td><b>Chữ trong video bị mờ khi zoom</b></td>
+        <td>"Chỗ zoom vào số liệu bị mờ. Vẽ lại số liệu đó bằng overlay chữ sắc nét thay vì zoom vào ảnh."</td>
+      </tr>
+      <tr>
+        <td><b>Video quá dài / quá ngắn</b></td>
+        <td>"Video đang [70] giây, rút còn đúng 60 giây, ưu tiên giữ đoạn kết quả AI."</td>
+      </tr>
+      <tr>
+        <td><b>Không biết bắt đầu từ đâu</b></td>
+        <td>"Mình là người mới, không rành kỹ thuật. Hãy hướng dẫn mình từng bước &amp; hỏi mình những gì bạn cần."</td>
+      </tr>
+    </table>
+  </div>
+  <div class="note tip"><div class="h">💡 Mẹo cuối</div>
+  Khi AI hỏi bạn một câu (ví dụ chọn phương án A hay B), cứ trả lời ngắn gọn bằng tiếng Việt.
+  Không chắc thì nói "bạn quyết giúp mình theo cách tốt nhất".</div>
+</div></section>
+
+<footer><div class="wrap">
+  <div>Hướng dẫn tạo Video Demo sản phẩm · <b style="color:var(--muted)">Playwright MCP × HyperFrames × edge-tts</b> · dựng bởi Claude Code</div>
+  <div class="pill">Bạn là đạo diễn — AI là ê-kíp. Mô tả ý tưởng, phần còn lại để AI lo. 🎬</div>
+</div></footer>
+
+<div class="toast" id="toast">Đã sao chép ✓</div>
+
+<script>
+  // Copy buttons: copy the sibling content (pre or .msg) to clipboard
+  function showToast(){
+    var t=document.getElementById('toast');
+    t.classList.add('show');
+    clearTimeout(window.__tt);
+    window.__tt=setTimeout(function(){t.classList.remove('show');},1600);
+  }
+  document.querySelectorAll('[data-copy]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var box=btn.closest('.cmd,.say');
+      var el=box ? box.querySelector('pre,.msg') : null;
+      if(!el) return;
+      var text=el.innerText;
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(showToast,function(){fallback(text);});
+      }else{ fallback(text); }
+    });
+  });
+  function fallback(text){
+    var ta=document.createElement('textarea');
+    ta.value=text; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); showToast(); }catch(e){}
+    document.body.removeChild(ta);
+  }
+  // Nav highlight on scroll
+  var secs=[].slice.call(document.querySelectorAll('section[id]'));
+  var links=[].slice.call(document.querySelectorAll('nav.top .links a'));
+  function onScroll(){
+    var y=window.scrollY+120, cur=null;
+    secs.forEach(function(s){ if(s.offsetTop<=y) cur=s.id; });
+    links.forEach(function(a){
+      a.style.color = a.getAttribute('href')==='#'+cur ? 'var(--cyan)' : '';
+      a.style.background = a.getAttribute('href')==='#'+cur ? 'rgba(34,211,238,0.1)' : '';
+    });
+  }
+  window.addEventListener('scroll',onScroll); onScroll();
+</script>
+</body>
+</html>
